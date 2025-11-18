@@ -1,0 +1,18 @@
+# environment
+venv/
+.env
+
+# python cache
+__pycache__/
+*.pyc
+
+# database lokal
+waste.db
+
+# file hasil upload/deteksi
+static/upload/
+static/image/result/
+
+# IDE/editor
+.vscode/
+.idea/

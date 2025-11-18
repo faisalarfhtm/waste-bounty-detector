@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Smart Waste Detector · Reward Poin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='Web/style.css') }}"
+    />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <header class="navbar light">
+      <div class="navbar-left">
+        <div class="logo-circle-light">SW</div>
+        <div class="logo-text">
+          <span class="logo-title">Smart Waste Detector</span>
+          <span class="logo-subtitle">Deteksi Sampah · Kumpulkan Poin</span>
+        </div>
+      </div>
+      <nav class="navbar-right">
+        <a href="{{ url_for('index') }}">Beranda</a>
+        <a href="{{ url_for('bounty_list') }}">Bounty</a>
+        <a href="#Reward">Reward</a>
+        {% if user %}
+        <span class="navbar-user">👋 {{ user['name'] }}</span>
+        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn-nav-secondary">Login</a>
+        <a href="{{ url_for('register') }}" class="btn-nav-primary">Daftar</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main class="main light">
+      <section id="Home" class="section">
+        <div class="hero-grid">
+          <div class="hero-text">
+            <h1>
+              Ubah Foto Sampah Menjadi
+              <span class="accent-green">Poin Kebaikan</span>
+            </h1>
+            <p class="hero-subtitle">
+              Upload sekali, deteksi otomatis jenis sampah dengan YOLO, dan
+              kumpulkan poin sebagai apresiasi atas kontribusimu menjaga
+              lingkungan.
+            </p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %} {%
+            if messages %}
+            <ul class="flash-list">
+              {% for category, message in messages %}
+              <li class="flash flash-{{ category }}">{{ message }}</li>
+              {% endfor %}
+            </ul>
+            {% endif %} {% endwith %}
+
+            <div class="stats-row">
+              <div class="stat-card-light">
+                <span class="stat-label">
+                  Total Poin {% if user %}(akunmu){% else %}(semua user){% endif
+                  %}
+                </span>
+                <span class="stat-value-green">{{ total_points }}</span>
+              </div>
+              <div class="stat-card-outline">
+                <span class="stat-label">Poin Upload Terakhir</span>
+                <span class="stat-value">
+                  {% if last_points is not none %} +{{ last_points }} {% else %}
+                  0 {% endif %}
+                </span>
+              </div>
+            </div>
+
+            <ul class="hero-list">
+              <li>
+                🌿 Deteksi otomatis: PET bottles, aluminium cans, HDPE, dan
+                lainnya
+              </li>
+              <li>🎮 Gamifikasi: poin dihitung per jenis sampah</li>
+              <li>📊 Data tersimpan di SQLite lengkap dengan identitas user</li>
+            </ul>
+
+            <div class="hero-illustration">
+              <div class="circle circle-1"></div>
+              <div class="circle circle-2"></div>
+              <div class="hero-card-floating">
+                <span class="hero-pill">AI Waste Detection</span>
+                <h3>Upload & Dapatkan Poin</h3>
+                <p>
+                  Setiap sampah yang terdeteksi menambah poin dan bisa
+                  dikembangkan menjadi program reward nyata.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card upload-card-light">
+            <h2>Upload Foto Sampah</h2>
+            {% if user %}
+            <p class="upload-subtitle">
+              Login sebagai <strong>{{ user['name'] }}</strong>
+              {% if user['region'] %} · {{ user['region'] }}{% endif %}
+            </p>
+            {% else %}
+            <p class="upload-subtitle">
+              Silakan <strong>login</strong> terlebih dahulu sebelum upload
+              gambar.
+            </p>
+            {% endif %}
+
+            <form
+              action="{{ url_for('report_bounty') }}"
+              method="post"
+              enctype="multipart/form-data"
+              class="upload-form"
+            >
+              <!-- tombol ambil lokasi -->
+              <button
+                type="button"
+                class="btn-primary"
+                style="margin-bottom: 6px"
+                onclick="getLocation()"
+              >
+                Gunakan lokasi saya
+              </button>
+
+              <input type="hidden" name="latitude" id="latitude" />
+              <input type="hidden" name="longitude" id="longitude" />
+
+              <p id="location-status" class="hint-text">
+                Lokasi belum aktif. Klik "Gunakan lokasi saya" lalu izinkan
+                akses lokasi.
+              </p>
+
+              <label class="dropzone-light">
+                <input
+                  type="file"
+                  name="file"
+                  accept="image/*"
+                  required
+                  onchange="handleFileChange(event)"
+                  {%
+                  if
+                  not
+                  user
+                  %}disabled{%
+                  endif
+                  %}
+                />
+                <div class="dropzone-inner">
+                  <div class="dropzone-icon">📷</div>
+                  <p class="dropzone-title">Pilih atau tarik gambar ke sini</p>
+                  <p class="dropzone-text">Format: JPG, JPEG, PNG</p>
+                  <p class="dropzone-filename" id="file-name">
+                    {% if user %} Belum ada file dipilih {% else %} Login untuk
+                    mengaktifkan upload {% endif %}
+                  </p>
+                </div>
+              </label>
+
+              <button
+                type="submit"
+                class="btn-primary"
+                {%
+                if
+                not
+                user
+                %}disabled{%
+                endif
+                %}
+              >
+                Deteksi & Hitung Poin
+              </button>
+            </form>
+
+            <p class="hint-text">
+              Aturan poin: PET_Bottles & Aluminium_Cans = 3, HDPE_Milk_Bottles =
+              2, lainnya = 1.
+            </p>
+
+            <p class="hint-text" style="margin-top: 6px">
+              Ingin membersihkan bounty sampah di sekitarmu?
+              <a href="{{ url_for('bounty_list') }}">Lihat daftar bounty</a>.
+            </p>
+          </div>
+        </div>
+
+        {% if image_url %}
+        <div class="result-grid">
+          <div class="card result-card-light">
+            <h2>Hasil Deteksi</h2>
+            <p class="result-subtitle">
+              Gambar berikut sudah dianalisis dan diberi bounding box pada objek
+              sampah.
+            </p>
+            <img
+              src="{{ image_url }}"
+              alt="Hasil deteksi sampah"
+              class="result-image"
+            />
+          </div>
+
+          <div class="card detection-card-light">
+            <h2>Detail Deteksi & Poin</h2>
+            {% if detections %}
+            <p class="result-subtitle">
+              Terdeteksi <strong>{{ detections|length }}</strong> objek sampah.
+            </p>
+            <ul class="detection-list-light">
+              {% for det in detections %}
+              <li class="detection-item-light">
+                <span class="badge-label-light">{{ det.label }}</span>
+                <span class="badge-confidence-light"
+                  >{{ det.confidence }}%</span
+                >
+              </li>
+              {% endfor %}
+            </ul>
+            <p class="result-subtitle" style="margin-top: 10px">
+              Poin dari upload ini:
+              <strong class="accent-green">+{{ last_points }}</strong>
+            </p>
+            {% else %}
+            <p class="result-subtitle">
+              Tidak ada objek sampah yang terdeteksi pada gambar ini.
+            </p>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </section>
+
+      <section id="Reward" class="section">
+        <div class="section-header">
+          <h2>Sistem Reward & Gamifikasi</h2>
+          <p>
+            Data poin per user bisa kamu gunakan sebagai dasar program insentif:
+            penukaran hadiah, badge, leaderboard, hingga laporan kontribusi
+            lingkungan.
+          </p>
+        </div>
+
+        <div class="reward-grid">
+          <div class="card reward-card-light">
+            <h3>Ringkasan Poin</h3>
+            <p class="reward-total-label">
+              Total poin {% if user %}akun
+              <strong>{{ user['user_id'] }}</strong>{% else %}(semua user){%
+              endif %}
+            </p>
+            <p class="reward-total-value">{{ total_points }}</p>
+
+            {% if last_points is not none and last_points > 0 %}
+            <p class="reward-last">
+              Upload terakhir menambah
+              <strong class="accent-green">+{{ last_points }}</strong> poin 🎉
+            </p>
+            {% elif last_points == 0 %}
+            <p class="reward-last">
+              Upload terakhir belum menghasilkan poin (tidak ada sampah
+              terdeteksi).
+            </p>
+            {% endif %}
+
+            <ul class="reward-rules">
+              <li>PET_Bottles → 3 poin / objek</li>
+              <li>Aluminium_Cans → 3 poin / objek</li>
+              <li>HDPE_Milk_Bottles → 2 poin / objek</li>
+              <li>Tipe sampah lain → 1 poin / objek</li>
+            </ul>
+          </div>
+
+          <div class="card info-card-light">
+            <h3>Ide Pengembangan</h3>
+            <ul class="idea-list">
+              <li>🏆 Leaderboard user paling banyak poin</li>
+              <li>📍 Pemetaan sebaran sampah berdasarkan domisili user</li>
+              <li>📊 Dashboard analitik jenis sampah & tren waktu</li>
+              <li>🎁 Penukaran poin menjadi voucher atau benefit lain</li>
+              <li>📱 Aplikasi mobile untuk pelaporan sampah real-time</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-light">
+      <span
+        >Smart Waste Detector · YOLO-based Waste Classification & Reward</span
+      >
+    </footer>
+
+    <script>
+      function handleFileChange(event) {
+        const input = event.target;
+        const label = document.getElementById("file-name");
+        if (input.files && input.files[0]) {
+          label.textContent = input.files[0].name;
+        } else {
+          label.textContent = "Belum ada file dipilih";
+        }
+      }
+
+      function getLocation() {
+        const statusEl = document.getElementById("location-status");
+        if (!navigator.geolocation) {
+          statusEl.textContent = "Browser tidak mendukung geolocation.";
+          return;
+        }
+        statusEl.textContent = "Mengambil lokasi...";
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lon;
+            statusEl.textContent =
+              "Lokasi tersimpan: " + lat.toFixed(5) + ", " + lon.toFixed(5);
+          },
+          function (err) {
+            statusEl.textContent = "Gagal mengambil lokasi: " + err.message;
+          }
+        );
+      }
+    </script>
+  </body>
+</html>

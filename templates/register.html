@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registrasi User · Smart Waste Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='Web/style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="navbar light">
+      <div class="navbar-left">
+        <div class="logo-circle-light">SW</div>
+        <div class="logo-text">
+          <span class="logo-title">Smart Waste Detector</span>
+          <span class="logo-subtitle">Registrasi User Baru</span>
+        </div>
+      </div>
+      <nav class="navbar-right">
+        <a href="{{ url_for('index') }}">Beranda</a>
+        <a href="{{ url_for('login') }}" class="btn-nav-secondary">Login</a>
+      </nav>
+    </header>
+
+    <main class="main light">
+      <section class="section auth-section">
+        <div class="card auth-card">
+          <h2>Daftar Akun Baru</h2>
+          <p class="hero-subtitle">
+            Buat akun untuk mulai mengupload foto sampah dan mengumpulkan poin.
+          </p>
+
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %} {% endwith %}
+
+          <form method="post" class="upload-form">
+            <div class="form-field">
+              <label for="user_id">User ID (unik)</label>
+              <input
+                type="text"
+                id="user_id"
+                name="user_id"
+                placeholder="misal: user_001"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="name">Nama Lengkap</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Nama sesuai identitas"
+                required
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="birth_date">Tanggal Lahir</label>
+                <input type="date" id="birth_date" name="birth_date" />
+              </div>
+              <div class="form-field">
+                <label for="phone">Nomor Handphone</label>
+                <input
+                  type="text"
+                  id="phone"
+                  name="phone"
+                  placeholder="08xxxxxxxxxx"
+                />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="region">Wilayah Domisili</label>
+              <input
+                type="text"
+                id="region"
+                name="region"
+                placeholder="misal: Bandung, Kec. Coblong"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required />
+              </div>
+              <div class="form-field">
+                <label for="password_confirm">Konfirmasi Password</label>
+                <input
+                  type="password"
+                  id="password_confirm"
+                  name="password_confirm"
+                  required
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Daftar Sekarang</button>
+          </form>
+
+          <p class="hint-text" style="margin-top: 10px">
+            Sudah punya akun?
+            <a href="{{ url_for('login') }}">Login di sini</a>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-light">
+      <span>Smart Waste Detector · User Registration</span>
+    </footer>
+  </body>
+</html>

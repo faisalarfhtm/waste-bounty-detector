@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Selesaikan Bounty · Smart Waste Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='Web/style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="navbar light">
+      <div class="navbar-left">
+        <div class="logo-circle-light">SW</div>
+        <div class="logo-text">
+          <span class="logo-title">Smart Waste Detector</span>
+          <span class="logo-subtitle">Selesaikan Bounty</span>
+        </div>
+      </div>
+      <nav class="navbar-right">
+        <a href="{{ url_for('bounty_list') }}">Kembali ke Bounty</a>
+        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
+      </nav>
+    </header>
+
+    <main class="main light">
+      <section class="section auth-section">
+        <div class="card auth-card">
+          <h2>Selesaikan Bounty #{{ bounty.id }}</h2>
+          <p class="hero-subtitle">
+            Bersihkan lokasi berikut, lalu upload foto AFTER untuk
+            mengkonfirmasi bahwa tumpukan sampah telah dibersihkan.
+          </p>
+
+          <p class="result-subtitle">
+            Lokasi: {{ bounty.location or '-' }}<br />
+            Poin yang akan kamu dapat sebagai cleaner:
+            <strong class="accent-green">{{ bounty.points_cleaner }}</strong>
+          </p>
+
+          <div style="margin-bottom: 14px">
+            <h4 style="margin: 0 0 4px">Foto BEFORE</h4>
+            <img src="{{ before_url }}" alt="Before" class="result-image" />
+          </div>
+
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %} {% endwith %}
+
+          <form method="post" enctype="multipart/form-data" class="upload-form">
+            <button
+              type="button"
+              class="btn-primary"
+              style="margin-bottom: 6px"
+              onclick="getAfterLocation()"
+            >
+              Gunakan lokasi saya (AFTER)
+            </button>
+
+            <input type="hidden" name="latitude" id="latitude" />
+            <input type="hidden" name="longitude" id="longitude" />
+
+            <p id="location-status" class="hint-text">
+              Lokasi AFTER belum aktif. Klik tombol di atas lalu izinkan akses
+              lokasi.
+            </p>
+
+            <div class="form-field">
+              <label for="file"
+                >Upload Foto AFTER (lokasi setelah dibersihkan)</label
+              >
+              <input
+                type="file"
+                id="file"
+                name="file"
+                accept="image/*"
+                required
+              />
+            </div>
+            <button type="submit" class="btn-primary">
+              Upload & Selesaikan Bounty
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-light">
+      <span>Smart Waste Detector · Complete Bounty</span>
+    </footer>
+
+    <script>
+      function getAfterLocation() {
+        const statusEl = document.getElementById("location-status");
+        if (!navigator.geolocation) {
+          statusEl.textContent = "Browser tidak mendukung geolocation.";
+          return;
+        }
+        statusEl.textContent = "Mengambil lokasi AFTER...";
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            document.getElementById("latitude").value = lat;
+            document.getElementById("longitude").value = lon;
+            statusEl.textContent =
+              "Lokasi AFTER tersimpan: " +
+              lat.toFixed(5) +
+              ", " +
+              lon.toFixed(5);
+          },
+          function (err) {
+            statusEl.textContent =
+              "Gagal mengambil lokasi AFTER: " + err.message;
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
