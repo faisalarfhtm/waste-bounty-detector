@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <title>Registrasi User · Smart Waste Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='Web/style.css') }}"
+    />
+  </head>
+  <body>
+     <header class="navbar light">
+      <div class="navbar-left">
+        <div class="logo-circle-light">SW</div>
+        <div class="logo-text">
+          <span class="logo-title">Smart Waste Detector</span>
+          <span class="logo-subtitle">Daftar Bounty Sampah</span>
+        </div>
+      </div>
+      <nav class="navbar-right">
+        <a href="{{ url_for('index') }}">Beranda</a>
+        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
+      </nav>
+    </header>
+
+      <main class="main light">
+      <section class="section">
+        <div class="section-header">
+          <h1>Redeem Reward E-Wallet</h1>
+          <p>
+            Di halaman ini kamu dapat menukar poin yang telah dikumpulkan
+            menjadi saldo e-wallet. 1 poin = Rp 1.
+          </p>
+        </div>
+
+        <!-- FLASH MESSAGE -->
+        <div class="container">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
+        </div>
+
+        <div class="reward-grid">
+          <!-- Kartu form redeem -->
+          <div class="card reward-card-light">
+            <h3>Saldo Poin Kamu</h3>
+            <p class="reward-total-label">
+              Akun: <strong>{{ user['user_id'] }}</strong>
+            </p>
+            <p class="reward-total-value">{{ total_points }}</p>
+
+            <p
+              style="
+                margin: 0 0 10px;
+                font-size: 12px;
+                color: #6b7280;
+              "
+            >
+              1 poin = Rp 1. Isi form di bawah untuk menukar poin menjadi saldo
+              e-wallet.
+            </p>
+
+            <form
+              method="post"
+              action="{{ url_for('redeem_points') }}"
+              class="upload-form"
+            >
+              <div class="form-field">
+                <label>Pilih e-wallet</label>
+                <div
+                  style="
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px 12px;
+                    font-size: 12px;
+                  "
+                >
+                  <label
+                    ><input
+                      type="radio"
+                      name="wallet_type"
+                      value="GOPAY"
+                      required
+                    />
+                    GoPay</label
+                  >
+                  <label
+                    ><input type="radio" name="wallet_type" value="DANA" />
+                    DANA</label
+                  >
+                  <label
+                    ><input type="radio" name="wallet_type" value="OVO" />
+                    OVO</label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="wallet_type"
+                      value="SHOPEEPAY"
+                    />
+                    ShopeePay</label
+                  >
+                  <label
+                    ><input
+                      type="radio"
+                      name="wallet_type"
+                      value="LINKAJA"
+                    />
+                    LinkAja</label
+                  >
+                  <label
+                    ><input type="radio" name="wallet_type" value="SAKUKU" />
+                    Sakuku</label
+                  >
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="full_name">Nama penerima</label>
+                <input
+                  type="text"
+                  id="full_name"
+                  name="full_name"
+                  placeholder="Nama lengkap sesuai akun e-wallet"
+                  required
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="phone">No. HP e-wallet</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  placeholder="08xxxxxxxxxx"
+                  required
+                />
+              </div>
+
+              <div class="form-field">
+                <label for="amount">
+                  Jumlah poin yang ingin ditukar
+                  <span style="font-size: 11px; color: #6b7280">
+                    (maksimal {{ total_points }} poin · 1 poin = Rp 1)
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  min="1"
+                  max="{{ total_points }}"
+                  placeholder="{{ total_points }}"
+                />
+                <p style="margin: 4px 0 0; font-size: 11px; color: #6b7280">
+                  Kosongkan jika ingin menukar semua poin.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                class="btn-primary"
+                {% if total_points|int <= 0 %}disabled{% endif %}
+              >
+                Tukar Poin Sekarang
+              </button>
+
+              <p style="margin: 6px 0 0; font-size: 11px; color: #6b7280">
+                Reward akan dikirim ke e-wallet kamu maksimal
+                <strong>24 jam</strong> setelah pengajuan.
+              </p>
+            </form>
+          </div>
+
+          <!-- Kartu riwayat -->
+          <div class="card info-card-light">
+            <h3>Riwayat Redeem</h3>
+            {% if redemptions %}
+            <ul
+              style="
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                font-size: 13px;
+                color: #4b5563;
+              "
+            >
+              {% for r in redemptions %}
+              <li
+                style="
+                  margin-bottom: 10px;
+                  border-bottom: 1px dashed #e5e7eb;
+                  padding-bottom: 6px;
+                "
+              >
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 8px;
+                  "
+                >
+                  <span>{{ r['wallet_type'] }}</span>
+                  <span>-{{ r['points'] }} poin (Rp {{ r['amount'] }})</span>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 8px;
+                    font-size: 11px;
+                    color: #6b7280;
+                  "
+                >
+                  <span>{{ r['requested_at'] }}</span>
+                  <span>Status: {{ r['status'] }}</span>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p
+              style="
+                font-size: 13px;
+                color: #6b7280;
+              "
+            >
+              Belum ada riwayat redeem. Tukar poin pertama kamu melalui form di
+              sebelah.
+            </p>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

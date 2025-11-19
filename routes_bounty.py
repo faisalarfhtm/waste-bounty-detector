@@ -21,11 +21,29 @@ from ml import model
 
 
 def init_bounty_routes(app):
-    # ---------- Home ----------
+    # Helper: ambil riwayat redeem poin user
+    def _get_user_redemptions(user_id):
+        if not user_id:
+            return []
+        conn = get_db_connection()
+        rows = conn.execute(
+            """
+            SELECT id, wallet_type, full_name, phone, points, amount, status, requested_at
+            FROM reward_redemptions
+            WHERE user_id = ?
+            ORDER BY datetime(requested_at) DESC
+            LIMIT 10
+            """,
+            (user_id,),
+        ).fetchall()
+        conn.close()
+        return rows
+
     @app.route("/", methods=["GET"])
     def index():
         user = current_user()
         total_points = get_total_points_for_user(user["user_id"]) if user else 0
+        redemptions = _get_user_redemptions(user["user_id"]) if user else []
 
         return render_template(
             "index.html",
@@ -35,7 +53,9 @@ def init_bounty_routes(app):
             image_url=None,
             user=user,
             just_created_bounty=None,
+            redemptions=redemptions,
         )
+
 
     # ---------- Report Bounty ----------
     @app.route("/submit", methods=["POST"])
@@ -100,24 +120,26 @@ def init_bounty_routes(app):
                     {"label": label, "confidence": round(float(conf) * 100, 2)}
                 )
 
-        # VALIDASI: kalau tidak ada sampah, jangan buat bounty
         if not detections:
-            flash(
-                "Tidak ada sampah yang terdeteksi pada gambar. "
-                "Bounty tidak dibuat dan tidak ada reward yang diberikan. "
-                "Silakan upload foto tumpukan sampah yang lebih jelas.",
-                "error",
-            )
-            total_points = get_total_points_for_user(user["user_id"])
-            return render_template(
-                "index.html",
-                total_points=total_points,
-                last_points=0,
-                detections=[],
-                image_url=None,
-                user=user,
-                just_created_bounty=None,
-            )
+         flash(
+             "Tidak ada sampah yang terdeteksi pada gambar. "
+             "Bounty tidak dibuat dan tidak ada reward yang diberikan. "
+             "Silakan upload foto tumpukan sampah yang lebih jelas.",
+             "error",
+         )
+         total_points = get_total_points_for_user(user["user_id"])
+         redemptions = _get_user_redemptions(user["user_id"])
+         return render_template(
+             "index.html",
+             total_points=total_points,
+             last_points=0,
+             detections=[],
+             image_url=None,
+             user=user,
+             just_created_bounty=None,
+             redemptions=redemptions,
+         )
+
 
         base_points = calculate_base_points(detections)
         points_reporter = base_points
@@ -170,6 +192,7 @@ def init_bounty_routes(app):
         conn.close()
 
         total_points = get_total_points_for_user(user["user_id"])
+        redemptions = _get_user_redemptions(user["user_id"])
 
         image_url = None
         if annotated_filename:
@@ -193,7 +216,105 @@ def init_bounty_routes(app):
                 "points_reporter": points_reporter,
                 "points_cleaner": points_cleaner,
             },
+            redemptions=redemptions,
         )
+    # ---------- Halaman Reward ----------
+    @app.route("/rewards", methods=["GET"])
+    def rewards_page():
+        user = current_user()
+        if not user:
+            flash("Silakan login terlebih dahulu untuk mengakses menu reward.", "error")
+            return redirect(url_for("login"))
+
+        total_points = get_total_points_for_user(user["user_id"])
+        redemptions = _get_user_redemptions(user["user_id"])
+
+        return render_template(
+            "rewards.html",
+            user=user,
+            total_points=total_points,
+            redemptions=redemptions,
+        )
+
+    # ---------- Redeem Reward ----------
+    @app.route("/rewards/redeem", methods=["POST"])
+    def redeem_points():
+        user = current_user()
+        if not user:
+            flash("Silakan login untuk menukar poin.", "error")
+            return redirect(url_for("login"))
+
+        wallet_type = (request.form.get("wallet_type") or "").upper()
+        full_name = (request.form.get("full_name") or "").strip()
+        phone = (request.form.get("phone") or "").strip()
+        amount_str = (request.form.get("amount") or "").strip()
+
+        allowed_wallets = ["GOPAY", "DANA", "OVO", "SHOPEEPAY", "LINKAJA", "SAKUKU"]
+
+        if wallet_type not in allowed_wallets:
+            flash("Pilih jenis e-wallet yang valid.", "error")
+            return redirect(url_for("rewards_page"))
+
+        if not full_name:
+            flash("Nama penerima tidak boleh kosong.", "error")
+            return redirect(url_for("rewards_page"))
+
+        if not phone:
+            flash("Nomor HP e-wallet tidak boleh kosong.", "error")
+            return redirect(url_for("rewards_page"))
+
+        total_points = get_total_points_for_user(user["user_id"])
+
+        if total_points <= 0:
+            flash("Poin kamu belum cukup untuk diredeem.", "error")
+            return redirect(url_for("rewards_page"))
+
+        if amount_str:
+            try:
+                amount = int(amount_str)
+            except ValueError:
+                flash("Jumlah poin yang ingin ditukar harus berupa angka.", "error")
+                return redirect(url_for("rewards_page"))
+        else:
+            # kalau kosong, redeem semua poin
+            amount = total_points
+
+        if amount <= 0:
+            flash("Jumlah poin yang ingin ditukar harus lebih dari 0.", "error")
+            return redirect(url_for("rewards_page"))
+
+        if amount > total_points:
+            flash("Jumlah poin yang ingin ditukar melebihi saldo poin kamu.", "error")
+            return redirect(url_for("rewards_page"))
+
+        conn = get_db_connection()
+        conn.execute(
+            """
+            INSERT INTO reward_redemptions
+                (user_id, wallet_type, full_name, phone, points, amount, status, requested_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                user["user_id"],
+                wallet_type,
+                full_name,
+                phone,
+                amount,
+                amount,  # 1 poin = Rp 1
+                "PENDING",
+                datetime.utcnow().isoformat(),
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        flash(
+            "Permintaan redeem berhasil dibuat. "
+            "Reward akan dikirim maksimal 24 jam ke e-wallet yang kamu pilih.",
+            "success",
+        )
+        return redirect(url_for("rewards_page"))
+
 
     # ---------- List Bounty (OPEN + CLAIMED) ----------
     @app.route("/bounties", methods=["GET"])

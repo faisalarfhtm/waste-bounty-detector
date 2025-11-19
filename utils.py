@@ -44,10 +44,18 @@ def haversine_m(lat1, lon1, lat2, lon2):
 
 
 def get_total_points_for_user(user_id: str | None):
+    """
+    Total poin yang MASIH BISA diredeem.
+    Hitung semua poin dari bounty COMPLETED milik user,
+    lalu dikurangi total poin yang sudah diredeem.
+    """
     if not user_id:
         return 0
+
     conn = get_db_connection()
-    row = conn.execute(
+
+    # total poin yang pernah didapat
+    earned_row = conn.execute(
         """
         SELECT
             COALESCE(SUM(
@@ -56,15 +64,31 @@ def get_total_points_for_user(user_id: str | None):
             +
             COALESCE(SUM(
                 CASE WHEN cleaner_id = ? THEN points_cleaner ELSE 0 END
-            ), 0)
-            AS total_points
+            ), 0) AS total_points
         FROM bounties
         WHERE status = 'COMPLETED'
         """,
         (user_id, user_id),
     ).fetchone()
+
+    # total poin yang sudah diredeem (pending & selesai sama-sama
+    # mengurangi saldo agar tidak bisa dobel redeem)
+    redeemed_row = conn.execute(
+        """
+        SELECT COALESCE(SUM(points), 0) AS redeemed_points
+        FROM reward_redemptions
+        WHERE user_id = ?
+          AND status IN ('PENDING', 'APPROVED', 'PAID')
+        """,
+        (user_id,),
+    ).fetchone()
+
     conn.close()
-    return row["total_points"] if row else 0
+
+    earned = earned_row["total_points"] if earned_row else 0
+    redeemed = redeemed_row["redeemed_points"] if redeemed_row else 0
+    return max(0, earned - redeemed)
+
 
 
 def get_user(user_id: str):

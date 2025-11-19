@@ -29,7 +29,7 @@
       <nav class="navbar-right">
         <a href="{{ url_for('index') }}">Beranda</a>
         <a href="{{ url_for('bounty_list') }}">Bounty</a>
-        <a href="#Reward">Reward</a>
+        <a href="{{ url_for('rewards_page') }}">Reward</a>
         {% if user %}
         <span class="navbar-user">👋 {{ user['name'] }}</span>
         <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
@@ -297,33 +297,38 @@
 
         <div class="reward-grid">
           <div class="card reward-card-light">
-            <h3>Ringkasan Poin</h3>
-            <p class="reward-total-label">
-              Total poin {% if user %} akun
-              <strong>{{ user['user_id'] }}</strong>
-              {% else %} (semua user) {% endif %}
-            </p>
-            <p class="reward-total-value">{{ total_points }}</p>
+  <h3>Ringkasan Poin</h3>
+  <p class="reward-total-label">
+    Total poin {% if user %} akun
+    <strong>{{ user['user_id'] }}</strong>
+    {% else %} (semua user) {% endif %}
+  </p>
+  <p class="reward-total-value">{{ total_points }}</p>
 
-            {% if last_points is not none and last_points > 0 %}
-            <p class="reward-last">
-              Upload terakhir menambah
-              <strong class="accent-green">+{{ last_points }}</strong> poin 🎉
-            </p>
-            {% elif last_points == 0 %}
-            <p class="reward-last">
-              Upload terakhir belum menghasilkan poin (tidak ada sampah
-              terdeteksi).
-            </p>
-            {% endif %}
+  {% if last_points is not none and last_points|int > 0 %}
+  <p class="reward-last">
+    Upload terakhir menambah
+    <strong class="accent-green">+{{ last_points }}</strong> poin 🎉
+  </p>
+  {% elif last_points == 0 %}
+  <p class="reward-last">
+    Upload terakhir belum menghasilkan poin (tidak ada sampah terdeteksi).
+  </p>
+  {% endif %}
 
-            <ul class="reward-rules">
-              <li>PET_Bottles → 3 poin / objek</li>
-              <li>Aluminium_Cans → 3 poin / objek</li>
-              <li>HDPE_Milk_Bottles → 2 poin / objek</li>
-              <li>Tipe sampah lain → 1 poin / objek</li>
-            </ul>
-          </div>
+  <ul class="reward-rules">
+    <li>PET_Bottles → 3 poin / objek</li>
+    <li>Aluminium_Cans → 3 poin / objek</li>
+    <li>HDPE_Milk_Bottles → 2 poin / objek</li>
+    <li>Tipe sampah lain → 1 poin / objek</li>
+  </ul>
+
+  <p style="margin-top: 10px; font-size: 12px; color: #6b7280">
+    Untuk menukar poin menjadi saldo e-wallet, gunakan menu
+    <strong>Reward</strong> di navbar.
+  </p>
+</div>
+
 
           <div class="card info-card-light">
             <h3>Ide Pengembangan</h3>
