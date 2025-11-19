@@ -1,13 +1,83 @@
-{% extends "base.html" %} {% block title %}Login - Waste Bounty Detector{%
-endblock %} {% block content %}
-<section class="wf100 p80">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-5">
-        <h2 class="mb-4">Login</h2>
-        <!-- form login kamu di sini -->
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login · Smart Waste Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='Web/style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="navbar light">
+      <div class="navbar-left">
+        <div class="logo-circle-light">SW</div>
+        <div class="logo-text">
+          <span class="logo-title">Smart Waste Detector</span>
+          <span class="logo-subtitle">Login Akun</span>
+        </div>
       </div>
-    </div>
-  </div>
-</section>
-{% endblock %}
+      <nav class="navbar-right">
+        <a href="{{ url_for('index') }}">Beranda</a>
+        <a href="{{ url_for('register') }}" class="btn-nav-secondary">Daftar</a>
+      </nav>
+    </header>
+
+    <main class="main light">
+      <section class="section auth-section">
+        <div class="card auth-card">
+          <h2>Login</h2>
+          <p class="hero-subtitle">
+            Masuk dengan User ID dan password yang sudah kamu daftarkan.
+          </p>
+
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %} {% endwith %}
+
+          <form method="post" class="upload-form">
+            <div class="form-field">
+              <label for="user_id">User ID</label>
+              <input
+                type="text"
+                id="user_id"
+                name="user_id"
+                placeholder="misal: user_001"
+                required
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required />
+            </div>
+
+            <button type="submit" class="btn-primary">Login</button>
+          </form>
+
+          <p class="hint-text" style="margin-top: 10px">
+            Belum punya akun?
+            <a href="{{ url_for('register') }}">Daftar di sini</a>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-light">
+      <span>Smart Waste Detector · User Login</span>
+    </footer>
+  </body>
+</html>
