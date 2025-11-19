@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta
+      name="description"
+      content="Waste Bounty Detector - Bantu bersihkan lingkungan dan dapatkan reward."
+    />
+    <meta name="author" content="Waste Bounty Detector" />
+
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='ecova/images/favicon.png') }}"
+    />
+
+    <title>{% block title %}Waste Bounty Detector{% endblock %}</title>
+
+    <!-- Ecova CSS -->
+    <link
+      href="{{ url_for('static', filename='ecova/css/custom.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='ecova/css/color.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='ecova/css/responsive.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='ecova/css/owl.carousel.min.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='ecova/css/bootstrap.min.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='ecova/css/prettyPhoto.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="{{ url_for('static', filename='ecova/css/all.min.css') }}"
+      rel="stylesheet"
+    />
+
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body>
+    <div class="wrapper home2">
+      <!-- Header Start (diadaptasi dari Ecova) -->
+      <header class="header-style-2">
+        <nav class="navbar navbar-expand-lg">
+          <a class="navbar-brand" href="{{ url_for('index') }}">
+            <img
+              src="{{ url_for('static', filename='ecova/images/h2logo.png') }}"
+              alt="Waste Bounty"
+            />
+          </a>
+
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <!-- Left menu -->
+            <ul class="navbar-nav me-auto">
+              <li class="nav-item">
+                <a
+                  class="nav-link{% if request.endpoint == 'index' %} active{% endif %}"
+                  href="{{ url_for('index') }}"
+                  >Home</a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('upload_bounty') }}"
+                  >Laporkan Sampah</a
+                >
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('list_bounties') }}"
+                  >Daftar Bounty</a
+                >
+              </li>
+              <!-- Kalau nanti perlu halaman lain, tambahkan di sini -->
+            </ul>
+
+            <!-- Right topnav (diadaptasi dari Ecova topnav-right) -->
+            <ul class="topnav-right">
+              {% if user %}
+              <li>
+                <span class="mdonate">
+                  <span>Hi, {{ user.username }}</span>
+                </span>
+              </li>
+              <li>
+                <a class="mdonate" href="{{ url_for('upload_bounty') }}">
+                  <span>+ Laporkan Bounty</span>
+                </a>
+              </li>
+              <li class="dropdown">
+                <a class="cart-icon" href="#" data-bs-toggle="dropdown">
+                  <i class="fas fa-user-circle"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                  <a class="dropdown-item" href="{{ url_for('profile') }}"
+                    >Profil</a
+                  >
+                  <a class="dropdown-item" href="{{ url_for('logout') }}"
+                    >Logout</a
+                  >
+                </div>
+              </li>
+              {% else %}
+              <li>
+                <a class="mdonate" href="{{ url_for('login') }}">
+                  <span>Login</span>
+                </a>
+              </li>
+              <li>
+                <a class="mdonate" href="{{ url_for('register') }}">
+                  <span>Daftar</span>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </nav>
+      </header>
+      <!-- Header End -->
+
+      <!-- Main content -->
+      {% block content %}{% endblock %}
+
+      <!-- Footer Start (style Ecova, isi disederhanakan) -->
+      <footer class="footer">
+        <div class="footer-top wf100">
+          <div class="container">
+            <div class="row">
+              <!-- Kolom 1 -->
+              <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="footer-widget">
+                  <h4>Waste Bounty Detector</h4>
+                  <p>
+                    Platform pelaporan dan pembersihan titik sampah liar.
+                    Laporkan, bersihkan, dapatkan bounty, dan jaga lingkungan
+                    bersama.
+                  </p>
+                </div>
+              </div>
+              <!-- Kolom 2 -->
+              <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="footer-widget">
+                  <h4>Fitur Utama</h4>
+                  <ul class="quick-links">
+                    <li>
+                      <a href="{{ url_for('upload_bounty') }}"
+                        >Laporkan Sampah</a
+                      >
+                    </li>
+                    <li>
+                      <a href="{{ url_for('list_bounties') }}">Cari Bounty</a>
+                    </li>
+                    <li><a href="#">Peer Review Kebersihan</a></li>
+                    <li><a href="#">Reward & Poin</a></li>
+                  </ul>
+                </div>
+              </div>
+              <!-- Kolom 3 -->
+              <div class="col-lg-4 col-md-6 col-sm-6">
+                <div class="footer-widget">
+                  <h4>Kontak</h4>
+                  <ul class="quick-links">
+                    <li>Email: support@wastebounty.local</li>
+                    <li>Lokasi: Bandung / Bekasi (demo project)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-copyr wf100">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <p>
+                  © {{ current_year }} Waste Bounty Detector. All Rights
+                  Reserved.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+      <!-- Footer End -->
+    </div>
+
+    <!-- JS Files Ecova (pindah ke /static) -->
+    <script src="{{ url_for('static', filename='ecova/js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='ecova/js/jquery-migrate-1.4.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='ecova/js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='ecova/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='ecova/js/owl.carousel.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='ecova/js/jquery.prettyPhoto.js') }}"></script>
+    <script src="{{ url_for('static', filename='ecova/js/isotope.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='ecova/js/custom.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>
