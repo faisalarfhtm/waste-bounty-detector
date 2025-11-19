@@ -79,13 +79,42 @@
               <label for="file"
                 >Upload Foto AFTER (lokasi setelah dibersihkan)</label
               >
+              <!-- INPUT FILE AFTER (DISIMBUNYIKAN) -->
               <input
                 type="file"
-                id="file"
+                id="after-file-input"
                 name="file"
                 accept="image/*"
-                required
+                style="display: none"
+                onchange="handleAfterFileChange(event)"
               />
+
+              <div class="after-upload-box">
+                <p class="label">Foto setelah dibersihkan (AFTER)</p>
+                <p class="hint-text">
+                  Pastikan area yang sebelumnya kotor sudah benar-benar bersih
+                  sebelum foto.
+                </p>
+                <div class="after-actions">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="openAfterGallery()"
+                  >
+                    Pilih dari Galeri
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-outline"
+                    onclick="openAfterCamera()"
+                  >
+                    Ambil Foto Kamera
+                  </button>
+                </div>
+                <p class="hint-text" id="after-file-name">
+                  Belum ada file AFTER dipilih
+                </p>
+              </div>
             </div>
             <button type="submit" class="btn-primary">
               Upload & Selesaikan Bounty
@@ -124,6 +153,28 @@
               "Gagal mengambil lokasi AFTER: " + err.message;
           }
         );
+      }
+
+      function handleAfterFileChange(event) {
+        const input = event.target;
+        const label = document.getElementById("after-file-name");
+        if (input.files && input.files[0]) {
+          label.textContent = "File AFTER: " + input.files[0].name;
+        } else {
+          label.textContent = "Belum ada file AFTER dipilih";
+        }
+      }
+
+      function openAfterGallery() {
+        const input = document.getElementById("after-file-input");
+        input.removeAttribute("capture");
+        input.click();
+      }
+
+      function openAfterCamera() {
+        const input = document.getElementById("after-file-input");
+        input.setAttribute("capture", "environment");
+        input.click();
       }
     </script>
   </body>

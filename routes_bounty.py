@@ -26,6 +26,7 @@ def init_bounty_routes(app):
     def index():
         user = current_user()
         total_points = get_total_points_for_user(user["user_id"]) if user else 0
+
         return render_template(
             "index.html",
             total_points=total_points,

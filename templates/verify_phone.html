@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Verifikasi Nomor HP · Smart Waste Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='Web/style.css') }}"
+    />
+  </head>
+  <body>
+    <header class="navbar light">
+      <div class="navbar-left">
+        <div class="logo-circle-light">SW</div>
+        <div class="logo-text">
+          <span class="logo-title">Smart Waste Detector</span>
+          <span class="logo-subtitle">Verifikasi Nomor HP</span>
+        </div>
+      </div>
+      <nav class="navbar-right">
+        <a href="{{ url_for('login') }}">Login</a>
+      </nav>
+    </header>
+
+    <main class="main light">
+      <section class="section auth-section">
+        <div class="card auth-card">
+          <h2>Masukkan Kode Verifikasi</h2>
+          <p class="hero-subtitle">
+            Kami telah mengirim 6 digit kode ke WhatsApp Anda. Masukkan kode
+            tersebut untuk menyelesaikan pendaftaran.
+          </p>
+
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <ul class="flash-list">
+            {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %} {% endwith %}
+
+          <form method="post" class="upload-form">
+            <div class="form-field">
+              <label for="code">Kode Verifikasi (6 digit)</label>
+              <input
+                type="text"
+                id="code"
+                name="code"
+                maxlength="6"
+                pattern="\d{6}"
+                placeholder="123456"
+                required
+              />
+            </div>
+
+            <button type="submit" class="btn-primary">
+              Verifikasi & Aktifkan Akun
+            </button>
+          </form>
+
+          <p class="hint-text">
+            Tidak menerima kode? Pastikan nomor WhatsApp benar dan memiliki
+            koneksi internet.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-light">
+      <span>Smart Waste Detector · Phone Verification</span>
+    </footer>
+  </body>
+</html>

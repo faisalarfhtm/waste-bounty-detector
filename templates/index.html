@@ -74,11 +74,24 @@
               <div class="stat-card-outline">
                 <span class="stat-label">Poin Upload Terakhir</span>
                 <span class="stat-value">
-                  {% if last_points is not none %} +{{ last_points }} {% else %}
-                  0 {% endif %}
+                  {% if last_points is not none %} +{{ last_points }} {% else
+                  %}0{% endif %}
                 </span>
               </div>
             </div>
+
+            {# STATUS WHATSAPP USER #} {% if user %}
+            <div class="stats-row">
+              <div class="stat-card-outline">
+                <span class="stat-label">Status WhatsApp</span>
+                {% if user['is_phone_verified'] == 1 %}
+                <span class="stat-value-green">Terverifikasi</span>
+                {% else %}
+                <span class="stat-value">Belum terverifikasi</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
 
             <ul class="hero-list">
               <li>
@@ -94,7 +107,7 @@
               <div class="circle circle-2"></div>
               <div class="hero-card-floating">
                 <span class="hero-pill">AI Waste Detection</span>
-                <h3>Upload & Dapatkan Poin</h3>
+                <h3>Upload &amp; Dapatkan Poin</h3>
                 <p>
                   Setiap sampah yang terdeteksi menambah poin dan bisa
                   dikembangkan menjadi program reward nyata.
@@ -141,29 +154,62 @@
                 akses lokasi.
               </p>
 
+              <input
+                type="file"
+                id="file-input"
+                name="file"
+                accept="image/*"
+                style="display: none"
+                onchange="handleFileChange(event)"
+                {%
+                if
+                not
+                user
+                %}disabled{%
+                endif
+                %}
+              />
+
               <label class="dropzone-light">
-                <input
-                  type="file"
-                  name="file"
-                  accept="image/*"
-                  required
-                  onchange="handleFileChange(event)"
-                  {%
-                  if
-                  not
-                  user
-                  %}disabled{%
-                  endif
-                  %}
-                />
                 <div class="dropzone-inner">
                   <div class="dropzone-icon">📷</div>
-                  <p class="dropzone-title">Pilih atau tarik gambar ke sini</p>
+                  <p class="dropzone-title">Pilih atau ambil gambar sampah</p>
                   <p class="dropzone-text">Format: JPG, JPEG, PNG</p>
                   <p class="dropzone-filename" id="file-name">
                     {% if user %} Belum ada file dipilih {% else %} Login untuk
                     mengaktifkan upload {% endif %}
                   </p>
+
+                  <div class="dropzone-actions">
+                    <button
+                      type="button"
+                      class="btn-secondary"
+                      onclick="openGallery()"
+                      {%
+                      if
+                      not
+                      user
+                      %}disabled{%
+                      endif
+                      %}
+                    >
+                      Pilih dari Galeri
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-outline"
+                      onclick="openCamera()"
+                      {%
+                      if
+                      not
+                      user
+                      %}disabled{%
+                      endif
+                      %}
+                    >
+                      Ambil Foto Kamera
+                    </button>
+                  </div>
                 </div>
               </label>
 
@@ -178,13 +224,13 @@
                 endif
                 %}
               >
-                Deteksi & Hitung Poin
+                Deteksi &amp; Hitung Poin
               </button>
             </form>
 
             <p class="hint-text">
-              Aturan poin: PET_Bottles & Aluminium_Cans = 3, HDPE_Milk_Bottles =
-              2, lainnya = 1.
+              Aturan poin: PET_Bottles &amp; Aluminium_Cans = 3,
+              HDPE_Milk_Bottles = 2, lainnya = 1.
             </p>
 
             <p class="hint-text" style="margin-top: 6px">
@@ -210,7 +256,7 @@
           </div>
 
           <div class="card detection-card-light">
-            <h2>Detail Deteksi & Poin</h2>
+            <h2>Detail Deteksi &amp; Poin</h2>
             {% if detections %}
             <p class="result-subtitle">
               Terdeteksi <strong>{{ detections|length }}</strong> objek sampah.
@@ -241,7 +287,7 @@
 
       <section id="Reward" class="section">
         <div class="section-header">
-          <h2>Sistem Reward & Gamifikasi</h2>
+          <h2>Sistem Reward &amp; Gamifikasi</h2>
           <p>
             Data poin per user bisa kamu gunakan sebagai dasar program insentif:
             penukaran hadiah, badge, leaderboard, hingga laporan kontribusi
@@ -253,9 +299,9 @@
           <div class="card reward-card-light">
             <h3>Ringkasan Poin</h3>
             <p class="reward-total-label">
-              Total poin {% if user %}akun
-              <strong>{{ user['user_id'] }}</strong>{% else %}(semua user){%
-              endif %}
+              Total poin {% if user %} akun
+              <strong>{{ user['user_id'] }}</strong>
+              {% else %} (semua user) {% endif %}
             </p>
             <p class="reward-total-value">{{ total_points }}</p>
 
@@ -284,7 +330,7 @@
             <ul class="idea-list">
               <li>🏆 Leaderboard user paling banyak poin</li>
               <li>📍 Pemetaan sebaran sampah berdasarkan domisili user</li>
-              <li>📊 Dashboard analitik jenis sampah & tren waktu</li>
+              <li>📊 Dashboard analitik jenis sampah &amp; tren waktu</li>
               <li>🎁 Penukaran poin menjadi voucher atau benefit lain</li>
               <li>📱 Aplikasi mobile untuk pelaporan sampah real-time</li>
             </ul>
@@ -295,7 +341,8 @@
 
     <footer class="footer-light">
       <span
-        >Smart Waste Detector · YOLO-based Waste Classification & Reward</span
+        >Smart Waste Detector · YOLO-based Waste Classification &amp;
+        Reward</span
       >
     </footer>
 
@@ -308,6 +355,20 @@
         } else {
           label.textContent = "Belum ada file dipilih";
         }
+      }
+
+      function openGallery() {
+        const input = document.getElementById("file-input");
+        // mode galeri: tanpa capture
+        input.removeAttribute("capture");
+        input.click();
+      }
+
+      function openCamera() {
+        const input = document.getElementById("file-input");
+        // mode kamera belakang (di HP): gunakan capture
+        input.setAttribute("capture", "environment");
+        input.click();
       }
 
       function getLocation() {

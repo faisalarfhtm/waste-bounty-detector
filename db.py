@@ -18,10 +18,12 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             user_id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
+            email TEXT,
             birth_date TEXT,
             region TEXT,
             phone TEXT,
-            password_hash TEXT
+            password_hash TEXT,
+            is_phone_verified INTEGER DEFAULT 0
         );
         """
     )
@@ -52,12 +54,19 @@ def init_db():
         """
     )
 
-    # jaga-jaga kalau DB lama belum ada kolom lat/lon
+    # --- Upgrade DB lama (tambah kolom jika hilang) ---
+
+    # Tambah latitude/longitude jika belum ada
     cols = [row["name"] for row in conn.execute("PRAGMA table_info(bounties)")]
     if "latitude" not in cols:
         conn.execute("ALTER TABLE bounties ADD COLUMN latitude REAL;")
     if "longitude" not in cols:
         conn.execute("ALTER TABLE bounties ADD COLUMN longitude REAL;")
+
+    # Tambah flag is_phone_verified jika belum ada
+    cols_users = [row["name"] for row in conn.execute("PRAGMA table_info(users)")]
+    if "is_phone_verified" not in cols_users:
+        conn.execute("ALTER TABLE users ADD COLUMN is_phone_verified INTEGER DEFAULT 0;")
 
     conn.commit()
     conn.close()
