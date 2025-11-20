@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Registrasi User · Smart Waste Detector</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='Web/style.css') }}"
+    />
+  </head>
+
+  <body>
+    <!-- NAVBAR sama seperti halaman lain -->
+        <header class="navbar light">
+      <div class="navbar-left">
+        <div class="logo-circle-light">SW</div>
+        <div class="logo-text">
+          <span class="logo-title">Smart Waste Detector</span>
+          <span class="logo-subtitle">Deteksi Sampah · Kumpulkan Poin</span>
+        </div>
+      </div>
+      <nav class="navbar-right">
+        <a href="{{ url_for('index') }}">Beranda</a>
+        <a href="{{ url_for('bounty_list') }}">Bounty</a>
+        <a href="{{ url_for('rewards_page') }}">Reward</a>
+           {% if user and user['role'] == 'admin' %}
+              <a href="{{ url_for('admin_rewards') }}">Admin</a>
+          {% endif %}
+        {% if user %}
+        <span class="navbar-user">👋 {{ user['name'] }}</span>
+        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="btn-nav-secondary">Login</a>
+        <a href="{{ url_for('register') }}" class="btn-nav-primary">Daftar</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <main class="main light">
+      <section class="section">
+        <div class="section-header">
+          <h1>Admin — Reward Redemptions</h1>
+          <p>Lihat semua permintaan redeem reward & ubah status menjadi PAID.</p>
+        </div>
+
+        <!-- FLASH MESSAGE -->
+        <div class="container">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
+        </div>
+
+        <div class="card info-card-light">
+          <h3>Daftar Redeem Reward</h3>
+
+          {% if redemptions %}
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>E-Wallet</th>
+                <th>Nama</th>
+                <th>HP</th>
+                <th>Poin</th>
+                <th>Rp</th>
+                <th>Status</th>
+                <th>Requested At</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for r in redemptions %}
+              <tr>
+                <td>{{ r['id'] }}</td>
+                <td>{{ r['user_id'] }}</td>
+                <td>{{ r['wallet_type'] }}</td>
+                <td>{{ r['full_name'] }}</td>
+                <td>{{ r['phone'] }}</td>
+                <td>{{ r['points'] }}</td>
+                <td>{{ r['amount'] }}</td>
+                <td>
+                  {% if r['status'] == 'PENDING' %}
+                  <span style="color: orange; font-weight: bold">PENDING</span>
+                  {% else %}
+                  <span style="color: green; font-weight: bold">PAID</span>
+                  {% endif %}
+                </td>
+                <td>{{ r['requested_at'] }}</td>
+                <td>
+                {% if r['status'] == 'PENDING' %}
+                <form method="post" action="{{ url_for('admin_update_reward', reward_id=r['id']) }}" style="margin-bottom:6px;">
+                    <input type="hidden" name="status" value="PAID" />
+                    <button type="submit" class="btn-primary">Set PAID</button>
+                </form>
+
+                <form method="post" action="{{ url_for('admin_update_reward', reward_id=r['id']) }}">
+                    <input type="hidden" name="status" value="FAILED" />
+                    <input type="text" name="reason" placeholder="Alasan gagal" required
+                         />
+                    <button type="submit" class="btn-danger">Set GAGAL</button>
+                </form>
+
+                {% else %}
+                    {% if r['status'] == 'FAILED' %}
+                        <span style="color:red;font-weight:bold;">GAGAL</span><br />
+                        <small style="color:#555;">{{ r['reason'] }}</small>
+                    {% else %}
+                        <span style="color:green;font-weight:bold;">PAID</span>
+                    {% endif %}
+                {% endif %}
+                </td>
+
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          {% else %}
+          <p>Tidak ada data redeem reward.</p>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

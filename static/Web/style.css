@@ -322,6 +322,42 @@ body {
   gap: 12px;
 }
 
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.admin-table th {
+  background: #f3f4f6;
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.admin-table td {
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table tr:hover {
+  background: #f9fafb;
+}
+
+.btn-danger {
+  background:#dc2626;
+  color:white;
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+}
+.btn-danger:hover {
+  background:#b91c1c;
+}
+
+
+
 .dropzone-light {
   position: relative;
   display: block;

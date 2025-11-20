@@ -594,3 +594,89 @@ def init_bounty_routes(app):
             bounty=bounty,
             before_url=before_url,
         )
+    @app.route("/admin/rewards", methods=["GET"])
+    def admin_rewards():
+        user = current_user()
+
+        if not user or user["role"] != "admin":
+            flash("Akses ditolak. Halaman ini hanya untuk admin.", "error")
+            return redirect(url_for("index"))
+
+        conn = get_db_connection()
+        rows = conn.execute(
+            """
+            SELECT id, user_id, wallet_type, full_name, phone,
+                points, amount, status, reason, requested_at
+            FROM reward_redemptions
+            ORDER BY datetime(requested_at) DESC
+            """
+        ).fetchall()
+        conn.close()
+
+        return render_template("admin_rewards.html", redemptions=rows, user=user)
+
+
+    @app.route("/admin/rewards/update/<int:reward_id>", methods=["POST"])
+    def admin_update_reward(reward_id):
+        user = current_user()
+
+        if not user or user["role"] != "admin":
+            flash("Akses ditolak.", "error")
+            return redirect(url_for("index"))
+
+        new_status = request.form.get("status")
+        reason = request.form.get("reason", "")
+
+        conn = get_db_connection()
+
+        # Ambil data redeem sebelumnya
+        row = conn.execute(
+            "SELECT user_id, points, status FROM reward_redemptions WHERE id = ?",
+            (reward_id,),
+        ).fetchone()
+
+        if not row:
+            flash("Data reward tidak ditemukan.", "error")
+            conn.close()
+            return redirect(url_for("admin_rewards"))
+
+        # Jika admin memilih GAGAL → kembalikan poin
+        if new_status == "FAILED":
+            # Hanya bisa dikembalikan jika status sebelumnya masih pending
+            if row["status"] == "PENDING":
+                conn.execute(
+                    """
+                    UPDATE reward_redemptions
+                    SET status = 'FAILED', reason = ?
+                    WHERE id = ?
+                    """,
+                    (reason, reward_id),
+                )
+                # Tidak perlu update poin di tabel bounty.
+                # Poin otomatis kembali karena redeemed tidak dihitung lagi.
+            else:
+                flash("Status tidak bisa diubah ke FAILED karena bukan PENDING.", "error")
+                conn.close()
+                return redirect(url_for("admin_rewards"))
+
+        # Jika admin memilih PAID
+        elif new_status == "PAID":
+            conn.execute(
+                """
+                UPDATE reward_redemptions
+                SET status = 'PAID', reason = NULL
+                WHERE id = ?
+                """,
+                (reward_id,),
+            )
+        else:
+            flash("Status tidak valid.", "error")
+            conn.close()
+            return redirect(url_for("admin_rewards"))
+
+        conn.commit()
+        conn.close()
+
+        flash("Status reward berhasil diperbarui.", "success")
+        return redirect(url_for("admin_rewards"))
+

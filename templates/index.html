@@ -30,6 +30,10 @@
         <a href="{{ url_for('index') }}">Beranda</a>
         <a href="{{ url_for('bounty_list') }}">Bounty</a>
         <a href="{{ url_for('rewards_page') }}">Reward</a>
+         {% if user and user['role'] == 'admin' %}
+              <a href="{{ url_for('admin_rewards') }}">Admin</a>
+          {% endif %}
+
         {% if user %}
         <span class="navbar-user">👋 {{ user['name'] }}</span>
         <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
