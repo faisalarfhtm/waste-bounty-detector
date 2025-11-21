@@ -1,251 +1,234 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8" />
-    <title>Registrasi User · Smart Waste Detector</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='Web/style.css') }}"
-    />
-  </head>
-  <body>
-     <header class="navbar light">
-      <div class="navbar-left">
-        <div class="logo-circle-light">SW</div>
-        <div class="logo-text">
-          <span class="logo-title">Smart Waste Detector</span>
-          <span class="logo-subtitle">Daftar Bounty Sampah</span>
-        </div>
-      </div>
-      <nav class="navbar-right">
-        <a href="{{ url_for('index') }}">Beranda</a>
-        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
-      </nav>
-    </header>
-
-      <main class="main light">
-      <section class="section">
-        <div class="section-header">
-          <h1>Redeem Reward E-Wallet</h1>
-          <p>
-            Di halaman ini kamu dapat menukar poin yang telah dikumpulkan
-            menjadi saldo e-wallet. 1 poin = Rp 1.
-          </p>
-        </div>
-
-        <!-- FLASH MESSAGE -->
-        <div class="container">
-          {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-          <div class="flash-container">
-            {% for category, message in messages %}
-            <div class="flash flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% endwith %}
-        </div>
-
-        <div class="reward-grid">
-          <!-- Kartu form redeem -->
-          <div class="card reward-card-light">
-            <h3>Saldo Poin Kamu</h3>
-            <p class="reward-total-label">
-              Akun: <strong>{{ user['user_id'] }}</strong>
-            </p>
-            <p class="reward-total-value">{{ total_points }}</p>
-
-            <p
-              style="
-                margin: 0 0 10px;
-                font-size: 12px;
-                color: #6b7280;
-              "
-            >
-              1 poin = Rp 1. Isi form di bawah untuk menukar poin menjadi saldo
-              e-wallet.
-            </p>
-
-            <form
-              method="post"
-              action="{{ url_for('redeem_points') }}"
-              class="upload-form"
-            >
-              <div class="form-field">
-                <label>Pilih e-wallet</label>
-                <div
-                  style="
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 6px 12px;
-                    font-size: 12px;
-                  "
-                >
-                  <label
-                    ><input
-                      type="radio"
-                      name="wallet_type"
-                      value="GOPAY"
-                      required
-                    />
-                    GoPay</label
-                  >
-                  <label
-                    ><input type="radio" name="wallet_type" value="DANA" />
-                    DANA</label
-                  >
-                  <label
-                    ><input type="radio" name="wallet_type" value="OVO" />
-                    OVO</label
-                  >
-                  <label
-                    ><input
-                      type="radio"
-                      name="wallet_type"
-                      value="SHOPEEPAY"
-                    />
-                    ShopeePay</label
-                  >
-                  <label
-                    ><input
-                      type="radio"
-                      name="wallet_type"
-                      value="LINKAJA"
-                    />
-                    LinkAja</label
-                  >
-                  <label
-                    ><input type="radio" name="wallet_type" value="SAKUKU" />
-                    Sakuku</label
-                  >
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem Reward - Smart Waste Detector</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Web/style.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="logo-badge"><i class="fas fa-gift"></i></div>
+                <div class="navbar-text">
+                    <span class="navbar-title">Smart Waste</span>
+                    <span class="navbar-subtitle">Reward & Redeem</span>
                 </div>
-              </div>
+            </a>
+            <div class="ms-auto">
+                <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
 
-              <div class="form-field">
-                <label for="full_name">Nama penerima</label>
-                <input
-                  type="text"
-                  id="full_name"
-                  name="full_name"
-                  placeholder="Nama lengkap sesuai akun e-wallet"
-                  required
-                />
-              </div>
-
-              <div class="form-field">
-                <label for="phone">No. HP e-wallet</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  placeholder="08xxxxxxxxxx"
-                  required
-                />
-              </div>
-
-              <div class="form-field">
-                <label for="amount">
-                  Jumlah poin yang ingin ditukar
-                  <span style="font-size: 11px; color: #6b7280">
-                    (maksimal {{ total_points }} poin · 1 poin = Rp 1)
-                  </span>
-                </label>
-                <input
-                  type="number"
-                  id="amount"
-                  name="amount"
-                  min="1"
-                  max="{{ total_points }}"
-                  placeholder="{{ total_points }}"
-                />
-                <p style="margin: 4px 0 0; font-size: 11px; color: #6b7280">
-                  Kosongkan jika ingin menukar semua poin.
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                class="btn-primary"
-                {% if total_points|int <= 0 %}disabled{% endif %}
-              >
-                Tukar Poin Sekarang
-              </button>
-
-              <p style="margin: 6px 0 0; font-size: 11px; color: #6b7280">
-                Reward akan dikirim ke e-wallet kamu maksimal
-                <strong>24 jam</strong> setelah pengajuan.
-              </p>
-            </form>
-          </div>
-
-          <!-- Kartu riwayat -->
-          <div class="card info-card-light">
-            <h3>Riwayat Redeem</h3>
-            {% if redemptions %}
-            <ul
-              style="
-                list-style: none;
-                padding: 0;
-                margin: 0;
-                font-size: 13px;
-                color: #4b5563;
-              "
-            >
-              {% for r in redemptions %}
-              <li
-                style="
-                  margin-bottom: 10px;
-                  border-bottom: 1px dashed #e5e7eb;
-                  padding-bottom: 6px;
-                "
-              >
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    gap: 8px;
-                  "
-                >
-                  <span>{{ r['wallet_type'] }}</span>
-                  <span>-{{ r['points'] }} poin (Rp {{ r['amount'] }})</span>
-                </div>
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    gap: 8px;
-                    font-size: 11px;
-                    color: #6b7280;
-                  "
-                >
-                  <span>{{ r['requested_at'] }}</span>
-                  <span>Status: {{ r['status'] }}</span>
-                </div>
-              </li>
-              {% endfor %}
-            </ul>
-            {% else %}
-            <p
-              style="
-                font-size: 13px;
-                color: #6b7280;
-              "
-            >
-              Belum ada riwayat redeem. Tukar poin pertama kamu melalui form di
-              sebelah.
+    <!-- MAIN CONTENT -->
+    <main class="container-fluid px-3 px-lg-5 py-5">
+        <!-- HERO SECTION -->
+        <section class="hero-section mb-5">
+            <h1 class="mb-3">
+                <i class="fas fa-money-bill-wave"></i> Tukar Poin Menjadi E-Wallet
+            </h1>
+            <p class="lead mb-0">
+                Di halaman ini kamu dapat menukar poin yang telah dikumpulkan menjadi saldo e-wallet. 
+                <strong>1 poin = Rp 1</strong>
             </p>
+        </section>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
             {% endif %}
-          </div>
+        {% endwith %}
+
+        <div class="row g-4">
+            <!-- FORM REDEEM -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-edit"></i> Form Tukar Poin</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- SALDO POIN -->
+                        <div class="bg-success bg-opacity-10 p-3 rounded mb-4 border border-success border-opacity-25">
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-user"></i> Akun: <strong>{{ user['user_id'] }}</strong>
+                            </p>
+                            <h2 class="text-success mb-0">
+                                <i class="fas fa-coins"></i> {{ total_points }} Poin
+                            </h2>
+                            <small class="text-muted">1 poin = Rp 1</small>
+                        </div>
+
+                        <form method="post" action="{{ url_for('redeem_points') }}">
+                            <!-- PILIH E-WALLET -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-wallet"></i> Pilih E-Wallet
+                                </label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="wallet_type" 
+                                                   value="GOPAY" id="gopay" required>
+                                            <label class="form-check-label" for="gopay">
+                                                🟢 GoPay
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="wallet_type" value="DANA" id="dana">
+                                            <label class="form-check-label" for="dana">
+                                                🔵 DANA
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="wallet_type" value="OVO" id="ovo">
+                                            <label class="form-check-label" for="ovo">
+                                                🟣 OVO
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="wallet_type" value="SHOPEEPAY" id="shopeepay">
+                                            <label class="form-check-label" for="shopeepay">
+                                                🟠 ShopeePay
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="wallet_type" value="LINKAJA" id="linkaja">
+                                            <label class="form-check-label" for="linkaja">
+                                                🟡 LinkAja
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="wallet_type" value="SAKUKU" id="sakuku">
+                                            <label class="form-check-label" for="sakuku">
+                                                💳 Sakuku
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- NAMA PENERIMA -->
+                            <div class="mb-3">
+                                <label for="full_name" class="form-label">
+                                    <i class="fas fa-user-tag"></i> Nama Penerima
+                                </label>
+                                <input type="text" class="form-control" id="full_name" name="full_name"
+                                       placeholder="Nama lengkap sesuai akun e-wallet" required>
+                            </div>
+
+                            <!-- NO HP E-WALLET -->
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">
+                                    <i class="fas fa-phone"></i> No. HP E-Wallet
+                                </label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                       placeholder="08xxxxxxxxxx" required>
+                            </div>
+
+                            <!-- JUMLAH POIN -->
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">
+                                    <i class="fas fa-coins"></i> Jumlah Poin yang Ingin Ditukar
+                                </label>
+                                <input type="number" class="form-control" id="amount" name="amount"
+                                       min="1" max="{{ total_points }}" placeholder="Kosongkan untuk tukar semua">
+                                <small class="text-muted">
+                                    Maksimal {{ total_points }} poin (1 poin = Rp 1)
+                                </small>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 mb-3" 
+                                    {% if total_points|int <= 0 %}disabled{% endif %}>
+                                <i class="fas fa-exchange-alt"></i> Tukar Poin Sekarang
+                            </button>
+
+                            <small class="text-muted d-block">
+                                <i class="fas fa-clock"></i> Reward akan dikirim maksimal <strong>24 jam</strong> setelah pengajuan.
+                            </small>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIWAYAT REDEEM -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> Riwayat Redeem</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if redemptions %}
+                            <div class="list-group">
+                                {% for r in redemptions %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-wallet"></i>
+                                                {{ r['wallet_type'] }}
+                                            </h6>
+                                            <small class="text-muted">
+                                                {{ r['requested_at'] }}<br>
+                                                No. HP: {{ r['phone'] }}
+                                            </small>
+                                        </div>
+                                        <span class="badge
+                                            {% if r['status'] == 'PENDING' %}badge-warning
+                                            {% elif r['status'] == 'PAID' %}badge-success
+                                            {% else %}badge-danger{% endif %}">
+                                            {{ r['status'] }}
+                                        </span>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">{{ r['points'] }} poin</span>
+                                        <strong class="text-success">Rp {{ r['amount'] }}</strong>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> 
+                                Belum ada riwayat redeem. Tukar poin pertama Anda melalui form di sebelah.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
-      </section>
     </main>
-  </body>
+
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 text-center text-muted border-top">
+        <small><i class="fas fa-leaf text-success"></i> Smart Waste Detector - Reward & Redeem</small>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

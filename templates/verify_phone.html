@@ -1,79 +1,173 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Verifikasi Nomor HP · Smart Waste Detector</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='Web/style.css') }}"
-    />
-  </head>
-  <body>
-    <header class="navbar light">
-      <div class="navbar-left">
-        <div class="logo-circle-light">SW</div>
-        <div class="logo-text">
-          <span class="logo-title">Smart Waste Detector</span>
-          <span class="logo-subtitle">Verifikasi Nomor HP</span>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Nomor HP - Smart Waste Detector</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Web/style.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="logo-badge">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="navbar-text">
+                    <span class="navbar-title">Smart Waste</span>
+                    <span class="navbar-subtitle">Verifikasi HP</span>
+                </div>
+            </a>
+            <div class="ms-auto">
+                <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-sign-in-alt"></i> Kembali ke Login
+                </a>
+            </div>
         </div>
-      </div>
-      <nav class="navbar-right">
-        <a href="{{ url_for('login') }}">Login</a>
-      </nav>
-    </header>
+    </nav>
 
-    <main class="main light">
-      <section class="section auth-section">
-        <div class="card auth-card">
-          <h2>Masukkan Kode Verifikasi</h2>
-          <p class="hero-subtitle">
-            Kami telah mengirim 6 digit kode ke WhatsApp Anda. Masukkan kode
-            tersebut untuk menyelesaikan pendaftaran.
-          </p>
-
-          {% with messages = get_flashed_messages(with_categories=true) %} {% if
-          messages %}
-          <ul class="flash-list">
-            {% for category, message in messages %}
-            <li class="flash flash-{{ category }}">{{ message }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %} {% endwith %}
-
-          <form method="post" class="upload-form">
-            <div class="form-field">
-              <label for="code">Kode Verifikasi (6 digit)</label>
-              <input
-                type="text"
-                id="code"
-                name="code"
-                maxlength="6"
-                pattern="\d{6}"
-                placeholder="123456"
-                required
-              />
+    <!-- MAIN CONTENT -->
+    <main class="container d-flex align-items-center justify-content-center min-vh-100 py-5">
+        <div class="row w-100" style="max-width: 900px;">
+            <!-- LEFT SIDE - ILLUSTRATION -->
+            <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center mb-4 mb-lg-0">
+                <div class="text-center">
+                    <div style="font-size: 100px; margin-bottom: 2rem;">
+                        📱
+                    </div>
+                    <h3 class="mb-3">Verifikasi WhatsApp</h3>
+                    <p class="text-muted">
+                        Kami mengirim kode verifikasi 6 digit ke nomor WhatsApp Anda. 
+                        Silakan masukkan kode tersebut untuk menyelesaikan pendaftaran.
+                    </p>
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <small class="text-muted">
+                            <i class="fas fa-check-circle text-success"></i> Proses verifikasi memastikan nomor Anda valid<br>
+                            <i class="fas fa-check-circle text-success"></i> Kode berlaku selama 15 menit<br>
+                            <i class="fas fa-check-circle text-success"></i> Anda dapat menghubungi admin jika ada masalah
+                        </small>
+                    </div>
+                </div>
             </div>
 
-            <button type="submit" class="btn-primary">
-              Verifikasi & Aktifkan Akun
-            </button>
-          </form>
+            <!-- RIGHT SIDE - VERIFICATION FORM -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg">
+                    <div class="card-header text-center">
+                        <h2 class="mb-2"><i class="fas fa-key text-success"></i></h2>
+                        <h4>Masukkan Kode Verifikasi</h4>
+                        <p class="text-muted small mb-0">Kami telah mengirim 6 digit kode ke WhatsApp Anda</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- FLASH MESSAGES -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
 
-          <p class="hint-text">
-            Tidak menerima kode? Pastikan nomor WhatsApp benar dan memiliki
-            koneksi internet.
-          </p>
+                        <form method="post">
+                            <div class="mb-4">
+                                <label for="code" class="form-label">
+                                    <i class="fas fa-shield-alt"></i> Kode Verifikasi (6 digit)
+                                </label>
+                                <input type="text" class="form-control form-control-lg text-center" 
+                                       id="code" name="code" maxlength="6" pattern="\d{6}" 
+                                       placeholder="000000" required
+                                       style="letter-spacing: 8px; font-size: 24px; font-weight: bold;">
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle"></i> Masukkan 6 digit kode yang Anda terima
+                                </small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
+                                <i class="fas fa-check-circle"></i> Verifikasi & Aktifkan Akun
+                            </button>
+                        </form>
+
+                        <hr>
+
+                        <!-- RESEND CODE SECTION -->
+                        <div class="alert alert-info small mb-0">
+                            <i class="fas fa-question-circle"></i> 
+                            <strong>Tidak menerima kode?</strong><br>
+                            Pastikan nomor WhatsApp Anda benar dan memiliki koneksi internet.
+                            Jika masih tidak menerima, hubungi admin di +62XXXXXXXXXX
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADDITIONAL INFO -->
+                <div class="mt-4 text-center">
+                    <small class="text-muted">
+                        Dengan melanjutkan, Anda menyetujui <a href="#" class="text-decoration-none">Syarat & Ketentuan</a> kami
+                    </small>
+                </div>
+            </div>
         </div>
-      </section>
     </main>
 
-    <footer class="footer-light">
-      <span>Smart Waste Detector · Phone Verification</span>
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 text-center text-muted">
+        <small><i class="fas fa-leaf text-success"></i> Smart Waste Detector © 2024 - Phone Verification</small>
     </footer>
-  </body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SCRIPT: Hanya izinkan input angka -->
+    <script>
+        document.getElementById('code').addEventListener('input', function(e) {
+            // Hanya izinkan angka
+            this.value = this.value.replace(/[^\d]/g, '');
+            // Maksimal 6 digit
+            if (this.value.length > 6) {
+                this.value = this.value.slice(0, 6);
+            }
+        });
+
+        // Auto-submit jika 6 digit sudah terpenuhi
+        document.getElementById('code').addEventListener('input', function(e) {
+            if (this.value.length === 6) {
+                // Optional: Bisa auto-submit atau tinggal user klik tombol
+                // this.closest('form').submit();
+            }
+        });
+    </script>
+</body>
 </html>
+
+<!-- ============================================ -->
+<!-- BONUS: CSS untuk verifikasi code input effect -->
+<style>
+    #code {
+        border: 2px solid var(--border-color);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    #code:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        outline: none;
+    }
+
+    /* Animation ketika mengetik */
+    #code {
+        animation: codeInputAnimation 0.3s ease;
+    }
+
+    @keyframes codeInputAnimation {
+        0% { transform: scale(0.98); }
+        100% { transform: scale(1); }
+    }
+</style>

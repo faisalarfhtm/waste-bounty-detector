@@ -1,145 +1,160 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Registrasi User · Smart Waste Detector</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='Web/style.css') }}"
-    />
-  </head>
-  <body>
-    <header class="navbar light">
-      <div class="navbar-left">
-        <div class="logo-circle-light">SW</div>
-        <div class="logo-text">
-          <span class="logo-title">Smart Waste Detector</span>
-          <span class="logo-subtitle">Registrasi User Baru</span>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - Smart Waste Detector</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Web/style.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="logo-badge">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="navbar-text">
+                    <span class="navbar-title">Smart Waste</span>
+                    <span class="navbar-subtitle">Detector & Reward</span>
+                </div>
+            </a>
+            <div class="ms-auto">
+                <a href="{{ url_for('login') }}" class="btn btn-login btn-sm">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
         </div>
-      </div>
-      <nav class="navbar-right">
-        <a href="{{ url_for('index') }}">Beranda</a>
-        <a href="{{ url_for('login') }}" class="btn-nav-secondary">Login</a>
-      </nav>
-    </header>
+    </nav>
 
-    <main class="main light">
-      <section class="section auth-section">
-        <div class="card auth-card">
-          <h2>Daftar Akun Baru</h2>
-          <p class="hero-subtitle">
-            Buat akun untuk mulai mengupload foto sampah dan mengumpulkan poin.
-          </p>
+    <!-- MAIN CONTENT -->
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg">
+                    <div class="card-header text-center">
+                        <h2 class="mb-2"><i class="fas fa-user-plus text-success"></i></h2>
+                        <h4>Daftar Akun Baru</h4>
+                        <p class="text-muted small mb-0">Buat akun untuk mulai mengumpulkan poin dan berkontribusi</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- FLASH MESSAGES -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
 
-          {% with messages = get_flashed_messages(with_categories=true) %} {% if
-          messages %}
-          <ul class="flash-list">
-            {% for category, message in messages %}
-            <li class="flash flash-{{ category }}">{{ message }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %} {% endwith %}
+                        <form method="post">
+                            <!-- ROW 1: User ID & Name -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="user_id" class="form-label">
+                                        <i class="fas fa-hashtag"></i> User ID (unik)
+                                    </label>
+                                    <input type="text" class="form-control" id="user_id" name="user_id" 
+                                           placeholder="misal: user_001" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">
+                                        <i class="fas fa-user"></i> Nama Lengkap
+                                    </label>
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           placeholder="Nama sesuai identitas" required>
+                                </div>
+                            </div>
 
-          <form method="post" class="upload-form">
-            <div class="form-field">
-              <label for="user_id">User ID (unik)</label>
-              <input
-                type="text"
-                id="user_id"
-                name="user_id"
-                placeholder="misal: user_001"
-                required
-              />
+                            <!-- ROW 2: Birth Date & Phone -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="birth_date" class="form-label">
+                                        <i class="fas fa-calendar"></i> Tanggal Lahir
+                                    </label>
+                                    <input type="date" class="form-control" id="birth_date" name="birth_date">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">
+                                        <i class="fas fa-phone"></i> Nomor HP (WhatsApp)
+                                    </label>
+                                    <input type="text" class="form-control" id="phone" name="phone" 
+                                           placeholder="08xxxxxxxxxx" required>
+                                </div>
+                            </div>
+
+                            <!-- EMAIL -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope"></i> Email
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="nama@contoh.com">
+                            </div>
+
+                            <!-- REGION -->
+                            <div class="mb-3">
+                                <label for="region" class="form-label">
+                                    <i class="fas fa-map-marker-alt"></i> Wilayah Domisili
+                                </label>
+                                <input type="text" class="form-control" id="region" name="region" 
+                                       placeholder="misal: Bandung, Kec. Coblong">
+                            </div>
+
+                            <!-- PASSWORD -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock"></i> Password
+                                    </label>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="Minimal 6 karakter" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="password_confirm" class="form-label">
+                                        <i class="fas fa-lock"></i> Konfirmasi Password
+                                    </label>
+                                    <input type="password" class="form-control" id="password_confirm" name="password_confirm" 
+                                           placeholder="Ulangi password Anda" required>
+                                </div>
+                            </div>
+
+                            <!-- SUBMIT -->
+                            <button type="submit" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-user-plus"></i> Daftar Sekarang
+                            </button>
+
+                            <!-- INFO TEXT -->
+                            <div class="alert alert-info small">
+                                <i class="fas fa-info-circle"></i> 
+                                Setelah mengisi form, sistem akan mengirim informasi ke WhatsApp Anda untuk verifikasi.
+                            </div>
+
+                            <hr>
+
+                            <p class="text-center text-muted small">
+                                Sudah punya akun? <a href="{{ url_for('login') }}" class="text-success fw-bold">Login di sini</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
             </div>
-
-            <div class="form-field">
-              <label for="name">Nama Lengkap</label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Nama sesuai identitas"
-                required
-              />
-            </div>
-
-            <div class="form-row">
-              <div class="form-field">
-                <label for="birth_date">Tanggal Lahir</label>
-                <input type="date" id="birth_date" name="birth_date" />
-              </div>
-              <div class="form-field">
-                <label for="phone">Nomor HP (WhatsApp)</label>
-                <input
-                  type="text"
-                  id="phone"
-                  name="phone"
-                  placeholder="08xxxxxxxxxx"
-                />
-              </div>
-            </div>
-
-            <div class="form-field">
-              <label for="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="nama@contoh.com"
-              />
-            </div>
-
-            <div class="form-field">
-              <label for="region">Wilayah Domisili</label>
-              <input
-                type="text"
-                id="region"
-                name="region"
-                placeholder="misal: Bandung, Kec. Coblong"
-              />
-            </div>
-
-            <div class="form-row">
-              <div class="form-field">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required />
-              </div>
-              <div class="form-field">
-                <label for="password_confirm">Konfirmasi Password</label>
-                <input
-                  type="password"
-                  id="password_confirm"
-                  name="password_confirm"
-                  required
-                />
-              </div>
-            </div>
-
-            <button type="submit" class="btn-primary">Daftar Sekarang</button>
-            <p class="hint-text">
-              Setelah mengisi form, sistem akan mengirim kode verifikasi ke
-              WhatsApp Anda. Masukkan kode tersebut untuk mengaktifkan akun.
-            </p>
-          </form>
-
-          <p class="hint-text" style="margin-top: 10px">
-            Sudah punya akun?
-            <a href="{{ url_for('login') }}">Login di sini</a>.
-          </p>
         </div>
-      </section>
     </main>
 
-    <footer class="footer-light">
-      <span>Smart Waste Detector · User Registration</span>
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 text-center text-muted">
+        <small><i class="fas fa-leaf text-success"></i> Smart Waste Detector © 2024</small>
     </footer>
-  </body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

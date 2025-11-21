@@ -1,83 +1,110 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Login · Smart Waste Detector</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='Web/style.css') }}"
-    />
-  </head>
-  <body>
-    <header class="navbar light">
-      <div class="navbar-left">
-        <div class="logo-circle-light">SW</div>
-        <div class="logo-text">
-          <span class="logo-title">Smart Waste Detector</span>
-          <span class="logo-subtitle">Login Akun</span>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Waste Detector</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Web/style.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="logo-badge">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="navbar-text">
+                    <span class="navbar-title">Smart Waste</span>
+                    <span class="navbar-subtitle">Detector & Reward</span>
+                </div>
+            </a>
+            <div class="ms-auto">
+                <a href="{{ url_for('register') }}" class="btn btn-register btn-sm">
+                    <i class="fas fa-user-plus"></i> Daftar
+                </a>
+            </div>
         </div>
-      </div>
-      <nav class="navbar-right">
-        <a href="{{ url_for('index') }}">Beranda</a>
-        <a href="{{ url_for('register') }}" class="btn-nav-secondary">Daftar</a>
-      </nav>
-    </header>
+    </nav>
 
-    <main class="main light">
-      <section class="section auth-section">
-        <div class="card auth-card">
-          <h2>Login</h2>
-          <p class="hero-subtitle">
-            Masuk dengan User ID dan password yang sudah kamu daftarkan.
-          </p>
-
-          {% with messages = get_flashed_messages(with_categories=true) %} {% if
-          messages %}
-          <ul class="flash-list">
-            {% for category, message in messages %}
-            <li class="flash flash-{{ category }}">{{ message }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %} {% endwith %}
-
-          <form method="post" class="upload-form">
-            <div class="form-field">
-              <label for="user_id">User ID</label>
-              <input
-                type="text"
-                id="user_id"
-                name="user_id"
-                placeholder="misal: user_001"
-                required
-              />
+    <!-- MAIN CONTENT -->
+    <main class="container d-flex align-items-center justify-content-center min-vh-100 py-5">
+        <div class="row w-100" style="max-width: 900px;">
+            <!-- LEFT SIDE - ILLUSTRATION -->
+            <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center mb-4 mb-lg-0">
+                <div class="text-center">
+                    <div style="font-size: 120px; margin-bottom: 2rem;">
+                        🔐
+                    </div>
+                    <h3 class="mb-3">Selamat Datang Kembali!</h3>
+                    <p class="text-muted">Masuk dengan akun Anda untuk mulai mengumpulkan poin dan berkontribusi pada kebersihan lingkungan.</p>
+                </div>
             </div>
 
-            <div class="form-field">
-              <label for="password">Password</label>
-              <input type="password" id="password" name="password" required />
+            <!-- RIGHT SIDE - LOGIN FORM -->
+            <div class="col-lg-6">
+                <div class="card shadow-lg">
+                    <div class="card-header text-center">
+                        <h2 class="mb-2"><i class="fas fa-sign-in-alt text-success"></i></h2>
+                        <h4>Login Akun</h4>
+                        <p class="text-muted small mb-0">Masuk dengan User ID dan password Anda</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- FLASH MESSAGES -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="post">
+                            <div class="mb-3">
+                                <label for="user_id" class="form-label">
+                                    <i class="fas fa-user"></i> User ID
+                                </label>
+                                <input type="text" class="form-control" id="user_id" name="user_id" 
+                                       placeholder="Masukkan User ID Anda" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-key"></i> Password
+                                </label>
+                                <input type="password" class="form-control" id="password" name="password" 
+                                       placeholder="Masukkan Password Anda" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-3">
+                                <i class="fas fa-sign-in-alt"></i> Login Sekarang
+                            </button>
+                        </form>
+
+                        <hr>
+
+                        <p class="text-center text-muted small">
+                            Belum punya akun? <a href="{{ url_for('register') }}" class="text-success fw-bold">Daftar di sini</a>
+                        </p>
+                    </div>
+                </div>
             </div>
-
-            <button type="submit" class="btn-primary">Login</button>
-          </form>
-
-          <p class="hint-text" style="margin-top: 10px">
-            Belum punya akun?
-            <a href="{{ url_for('register') }}">Daftar di sini</a>.
-          </p>
         </div>
-      </section>
     </main>
 
-    <footer class="footer-light">
-      <span>Smart Waste Detector · User Login</span>
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 text-center text-muted">
+        <small><i class="fas fa-leaf text-success"></i> Smart Waste Detector © 2024</small>
     </footer>
-  </body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

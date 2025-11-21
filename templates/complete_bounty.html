@@ -1,181 +1,203 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Selesaikan Bounty · Smart Waste Detector</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='Web/style.css') }}"
-    />
-  </head>
-  <body>
-    <header class="navbar light">
-      <div class="navbar-left">
-        <div class="logo-circle-light">SW</div>
-        <div class="logo-text">
-          <span class="logo-title">Smart Waste Detector</span>
-          <span class="logo-subtitle">Selesaikan Bounty</span>
-        </div>
-      </div>
-      <nav class="navbar-right">
-        <a href="{{ url_for('bounty_list') }}">Kembali ke Bounty</a>
-        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
-      </nav>
-    </header>
-
-    <main class="main light">
-      <section class="section auth-section">
-        <div class="card auth-card">
-          <h2>Selesaikan Bounty #{{ bounty.id }}</h2>
-          <p class="hero-subtitle">
-            Bersihkan lokasi berikut, lalu upload foto AFTER untuk
-            mengkonfirmasi bahwa tumpukan sampah telah dibersihkan.
-          </p>
-
-          <p class="result-subtitle">
-            Lokasi: {{ bounty.location or '-' }}<br />
-            Poin yang akan kamu dapat sebagai cleaner:
-            <strong class="accent-green">{{ bounty.points_cleaner }}</strong>
-          </p>
-
-          <div style="margin-bottom: 14px">
-            <h4 style="margin: 0 0 4px">Foto BEFORE</h4>
-            <img src="{{ before_url }}" alt="Before" class="result-image" />
-          </div>
-
-          {% with messages = get_flashed_messages(with_categories=true) %} {% if
-          messages %}
-          <ul class="flash-list">
-            {% for category, message in messages %}
-            <li class="flash flash-{{ category }}">{{ message }}</li>
-            {% endfor %}
-          </ul>
-          {% endif %} {% endwith %}
-
-          <form method="post" enctype="multipart/form-data" class="upload-form">
-            <button
-              type="button"
-              class="btn-primary"
-              style="margin-bottom: 6px"
-              onclick="getAfterLocation()"
-            >
-              Gunakan lokasi saya (AFTER)
-            </button>
-
-            <input type="hidden" name="latitude" id="latitude" />
-            <input type="hidden" name="longitude" id="longitude" />
-
-            <p id="location-status" class="hint-text">
-              Lokasi AFTER belum aktif. Klik tombol di atas lalu izinkan akses
-              lokasi.
-            </p>
-
-            <div class="form-field">
-              <label for="file"
-                >Upload Foto AFTER (lokasi setelah dibersihkan)</label
-              >
-              <!-- INPUT FILE AFTER (DISIMBUNYIKAN) -->
-              <input
-                type="file"
-                id="after-file-input"
-                name="file"
-                accept="image/*"
-                style="display: none"
-                onchange="handleAfterFileChange(event)"
-              />
-
-              <div class="after-upload-box">
-                <p class="label">Foto setelah dibersihkan (AFTER)</p>
-                <p class="hint-text">
-                  Pastikan area yang sebelumnya kotor sudah benar-benar bersih
-                  sebelum foto.
-                </p>
-                <div class="after-actions">
-                  <button
-                    type="button"
-                    class="btn-secondary"
-                    onclick="openAfterGallery()"
-                  >
-                    Pilih dari Galeri
-                  </button>
-                  <button
-                    type="button"
-                    class="btn-outline"
-                    onclick="openAfterCamera()"
-                  >
-                    Ambil Foto Kamera
-                  </button>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selesaikan Bounty - Smart Waste Detector</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Web/style.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="logo-badge"><i class="fas fa-leaf"></i></div>
+                <div class="navbar-text">
+                    <span class="navbar-title">Smart Waste</span>
+                    <span class="navbar-subtitle">Complete Bounty</span>
                 </div>
-                <p class="hint-text" id="after-file-name">
-                  Belum ada file AFTER dipilih
-                </p>
-              </div>
+            </a>
+            <div class="ms-auto d-flex gap-2">
+                <a href="{{ url_for('bounty_list') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
             </div>
-            <button type="submit" class="btn-primary">
-              Upload & Selesaikan Bounty
-            </button>
-          </form>
         </div>
-      </section>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- HERO SECTION -->
+                <section class="hero-section mb-4">
+                    <h1 class="mb-3">
+                        <i class="fas fa-check-circle"></i> Selesaikan Bounty #{{ bounty.id }}
+                    </h1>
+                    <p class="lead mb-0">
+                        Bersihkan lokasi berikut, lalu upload foto AFTER untuk mengkonfirmasi bahwa tumpukan sampah telah dibersihkan.
+                    </p>
+                </section>
+
+                <!-- INFO BOUNTY -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informasi Bounty</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="text-muted small">📍 Lokasi</p>
+                                <p class="fw-bold">{{ bounty.location or 'Tidak ada lokasi teks' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="text-muted small">💰 Poin yang Akan Kamu Dapatkan</p>
+                                <p class="fw-bold text-success" style="font-size: 24px;">
+                                    <i class="fas fa-star"></i> {{ bounty.points_cleaner }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FLASH MESSAGES -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- FOTO BEFORE -->
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-image"></i> Foto BEFORE (Sebelum Dibersihkan)</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="{{ before_url }}" alt="Before" class="img-detection">
+                        <small class="text-muted d-block mt-3">Pastikan lokasi yang Anda bersihkan sama dengan foto ini</small>
+                    </div>
+                </div>
+
+                <!-- UPLOAD FORM -->
+                <div class="card shadow-lg">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-upload"></i> Upload Foto AFTER</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            <!-- AMBIL LOKASI AFTER -->
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-outline-primary w-100 mb-3" onclick="getAfterLocation()">
+                                    <i class="fas fa-map-marker-alt"></i> Gunakan Lokasi Saya (AFTER)
+                                </button>
+                                <input type="hidden" name="latitude" id="latitude">
+                                <input type="hidden" name="longitude" id="longitude">
+                                <p id="location-status" class="text-muted small">
+                                    <i class="fas fa-info-circle"></i> Lokasi AFTER belum aktif. Klik tombol di atas lalu izinkan akses lokasi.
+                                </p>
+                            </div>
+
+                            <hr>
+
+                            <!-- FILE INPUT (HIDDEN) -->
+                            <input type="file" id="after-file-input" name="file" accept="image/*" style="display: none;" 
+                                   onchange="handleAfterFileChange(event)">
+
+                            <!-- UPLOAD ZONE -->
+                            <div class="dropzone mb-3" onclick="document.getElementById('after-file-input').click()">
+                                <div class="dropzone-icon">📷</div>
+                                <p class="upload-title">Pilih atau Ambil Foto AFTER</p>
+                                <p class="upload-text">Format: JPG, JPEG, PNG (Max 10MB)</p>
+                                <p id="after-file-name" class="text-success small">
+                                    Belum ada file AFTER dipilih
+                                </p>
+                                <div class="d-flex gap-2 justify-content-center mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            onclick="openAfterGallery()">
+                                        <i class="fas fa-image"></i> Galeri
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            onclick="openAfterCamera()">
+                                        <i class="fas fa-camera"></i> Ambil Foto
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-check-circle"></i> 
+                                <strong>Catatan Penting:</strong> Pastikan area yang sebelumnya kotor sudah benar-benar bersih sebelum mengambil foto AFTER. Sistem akan memeriksa apakah masih ada sampah di foto.
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 btn-lg">
+                                <i class="fas fa-check-double"></i> Upload & Selesaikan Bounty
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <footer class="footer-light">
-      <span>Smart Waste Detector · Complete Bounty</span>
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 text-center text-muted border-top">
+        <small><i class="fas fa-leaf text-success"></i> Smart Waste Detector - Complete Bounty</small>
     </footer>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-      function getAfterLocation() {
-        const statusEl = document.getElementById("location-status");
-        if (!navigator.geolocation) {
-          statusEl.textContent = "Browser tidak mendukung geolocation.";
-          return;
+        function getAfterLocation() {
+            const statusEl = document.getElementById("location-status");
+            if (!navigator.geolocation) {
+                statusEl.textContent = "❌ Browser tidak mendukung geolocation.";
+                return;
+            }
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengambil lokasi AFTER...';
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    document.getElementById("latitude").value = lat;
+                    document.getElementById("longitude").value = lon;
+                    statusEl.innerHTML = `<i class="fas fa-check-circle text-success"></i> Lokasi AFTER tersimpan: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                },
+                function (err) {
+                    statusEl.innerHTML = `❌ Gagal mengambil lokasi AFTER: ${err.message}`;
+                }
+            );
         }
-        statusEl.textContent = "Mengambil lokasi AFTER...";
-        navigator.geolocation.getCurrentPosition(
-          function (pos) {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            document.getElementById("latitude").value = lat;
-            document.getElementById("longitude").value = lon;
-            statusEl.textContent =
-              "Lokasi AFTER tersimpan: " +
-              lat.toFixed(5) +
-              ", " +
-              lon.toFixed(5);
-          },
-          function (err) {
-            statusEl.textContent =
-              "Gagal mengambil lokasi AFTER: " + err.message;
-          }
-        );
-      }
 
-      function handleAfterFileChange(event) {
-        const input = event.target;
-        const label = document.getElementById("after-file-name");
-        if (input.files && input.files[0]) {
-          label.textContent = "File AFTER: " + input.files[0].name;
-        } else {
-          label.textContent = "Belum ada file AFTER dipilih";
+        function handleAfterFileChange(event) {
+            const input = event.target;
+            const label = document.getElementById("after-file-name");
+            if (input.files && input.files[0]) {
+                label.textContent = `✓ ${input.files[0].name}`;
+                label.classList.add('text-success');
+            }
         }
-      }
 
-      function openAfterGallery() {
-        const input = document.getElementById("after-file-input");
-        input.removeAttribute("capture");
-        input.click();
-      }
+        function openAfterGallery() {
+            const input = document.getElementById("after-file-input");
+            input.removeAttribute("capture");
+            input.click();
+        }
 
-      function openAfterCamera() {
-        const input = document.getElementById("after-file-input");
-        input.setAttribute("capture", "environment");
-        input.click();
-      }
+        function openAfterCamera() {
+            const input = document.getElementById("after-file-input");
+            input.setAttribute("capture", "environment");
+            input.click();
+        }
     </script>
-  </body>
+</body>
 </html>

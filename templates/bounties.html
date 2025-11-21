@@ -1,181 +1,204 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Daftar Bounty Sampah · Smart Waste Detector</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='Web/style.css') }}"
-    />
-  </head>
-  <body>
-    <header class="navbar light">
-      <div class="navbar-left">
-        <div class="logo-circle-light">SW</div>
-        <div class="logo-text">
-          <span class="logo-title">Smart Waste Detector</span>
-          <span class="logo-subtitle">Daftar Bounty Sampah</span>
-        </div>
-      </div>
-      <nav class="navbar-right">
-        <a href="{{ url_for('index') }}">Beranda</a>
-        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
-      </nav>
-    </header>
-
-    <main class="main light">
-      <section class="section">
-        <h2 style="margin-top: 0; margin-bottom: 10px">
-          Bounty di Sekitar Kamu
-        </h2>
-        <p class="hero-subtitle">
-          Klik "Gunakan lokasi saya" untuk melihat bounty dalam radius 100 meter
-          dari posisi kamu.
-        </p>
-
-        <button
-          type="button"
-          class="btn-primary"
-          onclick="useLocationForBounty()"
-        >
-          Gunakan lokasi saya
-        </button>
-
-        {% if user_lat and user_lon %}
-        <p class="hint-text">
-          Menampilkan bounty OPEN dalam radius 100 m dari ({{
-          "%.5f"|format(user_lat) }}, {{ "%.5f"|format(user_lon) }}).
-        </p>
-        {% else %}
-        <p class="hint-text">
-          Lokasi belum aktif. Tidak ada bounty OPEN yang ditampilkan sampai
-          lokasi tersedia.
-        </p>
-        {% endif %} {% with messages =
-        get_flashed_messages(with_categories=true) %} {% if messages %}
-        <ul class="flash-list">
-          {% for category, message in messages %}
-          <li class="flash flash-{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-        {% endif %} {% endwith %} {% if open_bounties %}
-        <div class="reward-grid">
-          {% for b in open_bounties %}
-          <div class="card result-card-light">
-            <h3 style="margin-top: 0">Bounty #{{ b.id }}</h3>
-            <p class="result-subtitle">
-              Pelapor: <strong>{{ b.reporter_name }}</strong><br />
-              Lokasi (teks): {{ b.location or '-' }}<br />
-              {% if b.distance_m is not none %} Perkiraan jarak: {{
-              "%.1f"|format(b.distance_m) }} m<br />
-              {% endif %} Poin cleaner:
-              <strong class="accent-green">{{ b.points_cleaner }}</strong>
-            </p>
-            <img
-              src="{{ url_for('static', filename='upload/' + b.before_image) }}"
-              alt="Before"
-              class="result-image"
-            />
-            <form
-              action="{{ url_for('bounty_claim', bounty_id=b.id) }}{% if user_lat and user_lon %}?lat={{ user_lat }}&lon={{ user_lon }}{% endif %}"
-              method="post"
-              style="margin-top: 10px"
-            >
-              <button type="submit" class="btn-primary">
-                Ambil Bounty Ini
-              </button>
-            </form>
-          </div>
-          {% endfor %}
-        </div>
-        {% else %}
-        <p class="hint-text">
-          Tidak ada bounty OPEN dalam radius 100 m dari lokasimu (atau lokasi
-          belum aktif).
-        </p>
-        {% endif %}
-      </section>
-
-      <section class="section">
-        <h2 style="margin-top: 0; margin-bottom: 10px">
-          Bounty yang Sedang Kamu Kerjakan
-        </h2>
-        <p class="hero-subtitle">
-          Ini adalah bounty yang sudah kamu ambil (status CLAIMED) dan belum
-          selesai. Kamu bisa melanjutkan upload foto AFTER yang bersih dari
-          sini.
-        </p>
-
-        {% if my_claimed %}
-        <div class="reward-grid">
-          {% for b in my_claimed %}
-          <div class="card result-card-light">
-            <h3 style="margin-top: 0">Bounty #{{ b.id }}</h3>
-            <p class="result-subtitle">
-              Pelapor: <strong>{{ b.reporter_name }}</strong><br />
-              Lokasi (teks): {{ b.location or '-' }}<br />
-              Poin cleaner:
-              <strong class="accent-green">{{ b.points_cleaner }}</strong><br />
-              Diambil pada: {{ b.claimed_at or '-' }}
-            </p>
-            <img
-              src="{{ url_for('static', filename='upload/' + b.before_image) }}"
-              alt="Before"
-              class="result-image"
-            />
-            <a
-              href="{{ url_for('bounty_complete', bounty_id=b.id) }}"
-              class="btn-primary"
-              style="
-                display: inline-block;
-                text-align: center;
-                margin-top: 10px;
-                text-decoration: none;
-              "
-            >
-              Lanjutkan & Upload AFTER
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Bounty - Smart Waste Detector</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Web/style.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="logo-badge"><i class="fas fa-leaf"></i></div>
+                <div class="navbar-text">
+                    <span class="navbar-title">Smart Waste</span>
+                    <span class="navbar-subtitle">Bounty List</span>
+                </div>
             </a>
-          </div>
-          {% endfor %}
+            <div class="ms-auto d-flex gap-2">
+                <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-home"></i> Beranda
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
         </div>
-        {% else %}
-        <p class="hint-text">
-          Kamu belum punya bounty yang sedang dikerjakan, atau semua sudah
-          selesai ✅.
-        </p>
-        {% endif %}
-      </section>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="container-fluid px-3 px-lg-5 py-5">
+        <!-- HERO SECTION -->
+        <section class="hero-section mb-5">
+            <h1 class="mb-3">
+                <i class="fas fa-map-pin"></i> Bounty di Sekitar Kamu
+            </h1>
+            <p class="lead mb-4">
+                Klik "Gunakan lokasi saya" untuk melihat bounty dalam radius 100 meter dari posisi Anda. Bersihkan lokasi sampah dan dapatkan reward poin!
+            </p>
+            
+            <button type="button" class="btn btn-primary mb-3" onclick="useLocationForBounty()">
+                <i class="fas fa-map-marker-alt"></i> Gunakan Lokasi Saya
+            </button>
+
+            {% if user_lat and user_lon %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> 
+                Menampilkan bounty OPEN dalam radius 100 m dari ({{ "%.5f"|format(user_lat) }}, {{ "%.5f"|format(user_lon) }})
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> 
+                Lokasi belum aktif. Tidak ada bounty OPEN yang ditampilkan sampai lokasi tersedia.
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- OPEN BOUNTIES -->
+        <section class="mb-5">
+            <h2 class="mb-4">
+                <i class="fas fa-star"></i> Bounty Tersedia
+                {% if open_bounties %}
+                <span class="badge badge-success">{{ open_bounties|length }}</span>
+                {% endif %}
+            </h2>
+
+            {% if open_bounties %}
+            <div class="row g-4">
+                {% for b in open_bounties %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-hover">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-scroll"></i> Bounty #{{ b.id }}</h5>
+                                <span class="badge badge-success">
+                                    <i class="fas fa-coins"></i> {{ b.points_cleaner }} poin
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small">
+                                <i class="fas fa-user"></i> <strong>Pelapor:</strong> {{ b.reporter_name }}<br>
+                                <i class="fas fa-location-dot"></i> {{ b.location or '-' }}<br>
+                                {% if b.distance_m is not none %}
+                                <i class="fas fa-ruler"></i> <strong>Jarak:</strong> {{ "%.1f"|format(b.distance_m) }} m
+                                {% endif %}
+                            </p>
+                        </div>
+                        <img src="{{ url_for('static', filename='upload/' + b.before_image) }}" 
+                             alt="Lokasi sampah" class="img-detection">
+                        <div class="card-footer bg-light">
+                            <form action="{{ url_for('bounty_claim', bounty_id=b.id) }}{% if user_lat and user_lon %}?lat={{ user_lat }}&lon={{ user_lon }}{% endif %}" method="post">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-check-circle"></i> Ambil Bounty Ini
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                Tidak ada bounty OPEN dalam radius 100 m dari lokasimu (atau lokasi belum aktif).
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- CLAIMED BOUNTIES -->
+        <section class="mb-5">
+            <h2 class="mb-4">
+                <i class="fas fa-tasks"></i> Bounty yang Sedang Kamu Kerjakan
+                {% if my_claimed %}
+                <span class="badge badge-info">{{ my_claimed|length }}</span>
+                {% endif %}
+            </h2>
+
+            <p class="text-muted">Ini adalah bounty yang sudah kamu ambil (status CLAIMED) dan belum selesai.</p>
+
+            {% if my_claimed %}
+            <div class="row g-4">
+                {% for b in my_claimed %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-warning">
+                        <div class="card-header bg-warning bg-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="fas fa-hourglass-half"></i> Bounty #{{ b.id }}</h5>
+                                <span class="badge badge-warning">In Progress</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small">
+                                <i class="fas fa-user"></i> <strong>Pelapor:</strong> {{ b.reporter_name }}<br>
+                                <i class="fas fa-location-dot"></i> {{ b.location or '-' }}<br>
+                                <i class="fas fa-clock"></i> <strong>Diambil:</strong> {{ b.claimed_at or '-' }}
+                            </p>
+                        </div>
+                        <img src="{{ url_for('static', filename='upload/' + b.before_image) }}" 
+                             alt="Lokasi sampah" class="img-detection">
+                        <div class="card-footer bg-light">
+                            <a href="{{ url_for('bounty_complete', bounty_id=b.id) }}" class="btn btn-success w-100">
+                                <i class="fas fa-camera"></i> Lanjutkan & Upload AFTER
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                Kamu belum punya bounty yang sedang dikerjakan, atau semua sudah selesai ✓
+            </div>
+            {% endif %}
+        </section>
     </main>
 
-    <script>
-      function useLocationForBounty() {
-        if (!navigator.geolocation) {
-          alert("Browser tidak mendukung geolocation.");
-          return;
-        }
-        navigator.geolocation.getCurrentPosition(
-          function (pos) {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            const url = new URL(window.location.href);
-            url.searchParams.set("lat", lat);
-            url.searchParams.set("lon", lon);
-            window.location.href = url.toString();
-          },
-          function (err) {
-            alert("Gagal mengambil lokasi: " + err.message);
-          }
-        );
-      }
-    </script>
-
-    <footer class="footer-light">
-      <span>Smart Waste Detector · Bounty List</span>
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 text-center text-muted border-top">
+        <small><i class="fas fa-leaf text-success"></i> Smart Waste Detector - Bounty List</small>
     </footer>
-  </body>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function useLocationForBounty() {
+            if (!navigator.geolocation) {
+                alert("Browser tidak mendukung geolocation.");
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("lat", lat);
+                    url.searchParams.set("lon", lon);
+                    window.location.href = url.toString();
+                },
+                function (err) {
+                    alert("Gagal mengambil lokasi: " + err.message);
+                }
+            );
+        }
+    </script>
+</body>
 </html>

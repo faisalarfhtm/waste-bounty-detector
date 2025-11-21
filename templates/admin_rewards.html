@@ -1,141 +1,204 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Registrasi User · Smart Waste Detector</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='Web/style.css') }}"
-    />
-  </head>
-
-  <body>
-    <!-- NAVBAR sama seperti halaman lain -->
-        <header class="navbar light">
-      <div class="navbar-left">
-        <div class="logo-circle-light">SW</div>
-        <div class="logo-text">
-          <span class="logo-title">Smart Waste Detector</span>
-          <span class="logo-subtitle">Deteksi Sampah · Kumpulkan Poin</span>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Reward Redemptions</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Web/style.css') }}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container-fluid px-3 px-lg-5">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <div class="logo-badge"><i class="fas fa-cog"></i></div>
+                <div class="navbar-text">
+                    <span class="navbar-title">Admin Panel</span>
+                    <span class="navbar-subtitle">Reward Management</span>
+                </div>
+            </a>
+            <div class="ms-auto d-flex gap-2">
+                <a href="{{ url_for('index') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
         </div>
-      </div>
-      <nav class="navbar-right">
-        <a href="{{ url_for('index') }}">Beranda</a>
-        <a href="{{ url_for('bounty_list') }}">Bounty</a>
-        <a href="{{ url_for('rewards_page') }}">Reward</a>
-           {% if user and user['role'] == 'admin' %}
-              <a href="{{ url_for('admin_rewards') }}">Admin</a>
-          {% endif %}
-        {% if user %}
-        <span class="navbar-user">👋 {{ user['name'] }}</span>
-        <a href="{{ url_for('logout') }}" class="btn-nav-secondary">Logout</a>
-        {% else %}
-        <a href="{{ url_for('login') }}" class="btn-nav-secondary">Login</a>
-        <a href="{{ url_for('register') }}" class="btn-nav-primary">Daftar</a>
-        {% endif %}
-      </nav>
-    </header>
+    </nav>
 
-    <main class="main light">
-      <section class="section">
-        <div class="section-header">
-          <h1>Admin — Reward Redemptions</h1>
-          <p>Lihat semua permintaan redeem reward & ubah status menjadi PAID.</p>
-        </div>
+    <!-- MAIN CONTENT -->
+    <main class="container-fluid px-3 px-lg-5 py-5">
+        <!-- HERO SECTION -->
+        <section class="hero-section mb-5">
+            <h1 class="mb-3">
+                <i class="fas fa-coins"></i> Admin - Reward Redemptions
+            </h1>
+            <p class="lead mb-0">
+                Lihat semua permintaan redeem reward dari user dan ubah status menjadi PAID atau GAGAL.
+            </p>
+        </section>
 
-        <!-- FLASH MESSAGE -->
-        <div class="container">
-          {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-          <div class="flash-container">
-            {% for category, message in messages %}
-            <div class="flash flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% endwith %}
-        </div>
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-        <div class="card info-card-light">
-          <h3>Daftar Redeem Reward</h3>
-
-          {% if redemptions %}
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>User</th>
-                <th>E-Wallet</th>
-                <th>Nama</th>
-                <th>HP</th>
-                <th>Poin</th>
-                <th>Rp</th>
-                <th>Status</th>
-                <th>Requested At</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {% for r in redemptions %}
-              <tr>
-                <td>{{ r['id'] }}</td>
-                <td>{{ r['user_id'] }}</td>
-                <td>{{ r['wallet_type'] }}</td>
-                <td>{{ r['full_name'] }}</td>
-                <td>{{ r['phone'] }}</td>
-                <td>{{ r['points'] }}</td>
-                <td>{{ r['amount'] }}</td>
-                <td>
-                  {% if r['status'] == 'PENDING' %}
-                  <span style="color: orange; font-weight: bold">PENDING</span>
-                  {% else %}
-                  <span style="color: green; font-weight: bold">PAID</span>
-                  {% endif %}
-                </td>
-                <td>{{ r['requested_at'] }}</td>
-                <td>
-                {% if r['status'] == 'PENDING' %}
-                <form method="post" action="{{ url_for('admin_update_reward', reward_id=r['id']) }}" style="margin-bottom:6px;">
-                    <input type="hidden" name="status" value="PAID" />
-                    <button type="submit" class="btn-primary">Set PAID</button>
-                </form>
-
-                <form method="post" action="{{ url_for('admin_update_reward', reward_id=r['id']) }}">
-                    <input type="hidden" name="status" value="FAILED" />
-                    <input type="text" name="reason" placeholder="Alasan gagal" required
-                         />
-                    <button type="submit" class="btn-danger">Set GAGAL</button>
-                </form>
-
-                {% else %}
-                    {% if r['status'] == 'FAILED' %}
-                        <span style="color:red;font-weight:bold;">GAGAL</span><br />
-                        <small style="color:#555;">{{ r['reason'] }}</small>
-                    {% else %}
-                        <span style="color:green;font-weight:bold;">PAID</span>
+        <!-- TABLE SECTION -->
+        <div class="card shadow-lg">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-table"></i> Daftar Redeem Reward
+                    {% if redemptions %}
+                    <span class="badge bg-info ms-2">{{ redemptions|length }} total</span>
                     {% endif %}
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if redemptions %}
+                    <!-- RESPONSIVE TABLE -->
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-hashtag"></i> ID</th>
+                                    <th><i class="fas fa-user"></i> User</th>
+                                    <th><i class="fas fa-wallet"></i> E-Wallet</th>
+                                    <th><i class="fas fa-user-tag"></i> Nama</th>
+                                    <th><i class="fas fa-phone"></i> HP</th>
+                                    <th><i class="fas fa-coins"></i> Poin</th>
+                                    <th><i class="fas fa-money-bill"></i> Rp</th>
+                                    <th><i class="fas fa-badge-check"></i> Status</th>
+                                    <th><i class="fas fa-clock"></i> Requested At</th>
+                                    <th><i class="fas fa-cog"></i> Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in redemptions %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">#{{ r['id'] }}</span>
+                                    </td>
+                                    <td><strong>{{ r['user_id'] }}</strong></td>
+                                    <td>
+                                        <i class="fas fa-wallet"></i> {{ r['wallet_type'] }}
+                                    </td>
+                                    <td>{{ r['full_name'] }}</td>
+                                    <td><small>{{ r['phone'] }}</small></td>
+                                    <td>
+                                        <span class="badge bg-info">{{ r['points'] }}</span>
+                                    </td>
+                                    <td><strong class="text-success">Rp {{ r['amount'] }}</strong></td>
+                                    <td>
+                                        {% if r['status'] == 'PENDING' %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-hourglass-half"></i> PENDING
+                                            </span>
+                                        {% elif r['status'] == 'PAID' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> PAID
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times-circle"></i> GAGAL
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td><small>{{ r['requested_at'] }}</small></td>
+                                    <td>
+                                        {% if r['status'] == 'PENDING' %}
+                                            <div class="d-flex gap-1">
+                                                <!-- SET PAID -->
+                                                <form method="post" action="{{ url_for('admin_update_reward', reward_id=r['id']) }}" style="display:inline;">
+                                                    <input type="hidden" name="status" value="PAID">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Mark as PAID">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+
+                                                <!-- SET GAGAL -->
+                                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" 
+                                                        data-bs-target="#failModal{{ r['id'] }}" title="Mark as FAILED">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+
+                                            <!-- FAIL MODAL -->
+                                            <div class="modal fade" id="failModal{{ r['id'] }}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Set Status GAGAL</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <form method="post" action="{{ url_for('admin_update_reward', reward_id=r['id']) }}">
+                                                            <div class="modal-body">
+                                                                <input type="hidden" name="status" value="FAILED">
+                                                                <div class="mb-3">
+                                                                    <label for="reason{{ r['id'] }}" class="form-label">
+                                                                        Alasan Gagal:
+                                                                    </label>
+                                                                    <textarea class="form-control" id="reason{{ r['id'] }}" name="reason" 
+                                                                              placeholder="Jelaskan alasan redeem gagal..." required></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                    Batal
+                                                                </button>
+                                                                <button type="submit" class="btn btn-danger">
+                                                                    <i class="fas fa-check"></i> Konfirmasi GAGAL
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% elif r['status'] == 'FAILED' %}
+                                            <small class="text-danger">
+                                                <i class="fas fa-times-circle"></i>
+                                            </small>
+                                            <br>
+                                            <small class="text-muted d-block mt-1">
+                                                Alasan: {{ r['reason'] or '-' }}
+                                            </small>
+                                        {% else %}
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle"></i>
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info m-3">
+                        <i class="fas fa-info-circle"></i> Tidak ada data redeem reward.
+                    </div>
                 {% endif %}
-                </td>
-
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-
-          {% else %}
-          <p>Tidak ada data redeem reward.</p>
-          {% endif %}
+            </div>
         </div>
-      </section>
     </main>
-  </body>
+
+    <!-- FOOTER -->
+    <footer class="mt-5 py-4 text-center text-muted border-top">
+        <small><i class="fas fa-leaf text-success"></i> Smart Waste Detector - Admin Panel</small>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
