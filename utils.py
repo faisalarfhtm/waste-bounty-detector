@@ -10,19 +10,24 @@ def allowed_file(filename: str) -> bool:
         "jpeg",
     }
 
-
 def calculate_base_points(detections):
     """
     Hitung poin dasar dari list detections.
     """
     score_map = {
-        "PET_Bottles": 3,
-        "Aluminium_Cans": 3,
-        "HDPE_Milk_Bottles": 2,
+        "aluminium wrap": 25,
+        "cardboard": 35,
+        "cigarette": 5,
+        "general waste": 25,
+        "glass": 100,
+        "metal": 100,
+        "paper": 30,
+        "plastic": 50,
+        "styrofoam": 50,
     }
     total = 0
     for det in detections:
-        total += score_map.get(det["label"], 1)
+        total += score_map.get(det["label"], 25)
     return total
 
 
