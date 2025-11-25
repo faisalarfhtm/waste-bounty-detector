@@ -13,3 +13,4 @@ static/image/result/
 # IDE/editor
 .vscode/
 .idea/
+waste.db
