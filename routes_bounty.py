@@ -208,7 +208,7 @@ def init_bounty_routes(app):
         return render_template(
             "index.html",
             total_points=total_points,
-            last_points=None,
+            last_points=points_reporter,
             detections=detections,
             image_url=image_url,
             user=user,
